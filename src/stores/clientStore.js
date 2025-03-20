@@ -1,0 +1,98 @@
+import { ref } from "vue";
+
+// This creates a reactive clients array that can be shared across components
+export const clients = ref([
+  {
+    id: 1,
+    name: "Jane Doe",
+    email: "jane.doe@example.com",
+    location: "New York, USA",
+    lastOrder: "Mar 15, 2025",
+    totalOrders: 8,
+    totalSpent: "$1,200.00",
+    status: "Active",
+    selected: false,
+  },
+  {
+    id: 2,
+    name: "John Smith",
+    email: "john.smith@example.com",
+    location: "Los Angeles, USA",
+    lastOrder: "Mar 14, 2025",
+    totalOrders: 12,
+    totalSpent: "$2,450.00",
+    status: "Active",
+    selected: false,
+  },
+  {
+    id: 3,
+    name: "Alice Johnson",
+    email: "alice.j@example.com",
+    location: "London, UK",
+    lastOrder: "Mar 13, 2025",
+    totalOrders: 3,
+    totalSpent: "$650.00",
+    status: "New",
+    selected: false,
+  },
+  {
+    id: 4,
+    name: "Robert Wilson",
+    email: "robert.w@example.com",
+    location: "Chicago, USA",
+    lastOrder: "Mar 10, 2025",
+    totalOrders: 6,
+    totalSpent: "$980.00",
+    status: "Active",
+    selected: false,
+  },
+  {
+    id: 5,
+    name: "Sarah Davis",
+    email: "sarah.d@example.com",
+    location: "Toronto, Canada",
+    lastOrder: "Mar 5, 2025",
+    totalOrders: 2,
+    totalSpent: "$350.00",
+    status: "New",
+    selected: false,
+  },
+  {
+    id: 6,
+    name: "Michael Brown",
+    email: "michael.b@example.com",
+    location: "Sydney, Australia",
+    lastOrder: "Mar 3, 2025",
+    totalOrders: 4,
+    totalSpent: "$720.00",
+    status: "Active",
+    selected: false,
+  },
+  {
+    id: 7,
+    name: "Lisa Garcia",
+    email: "lisa.g@example.com",
+    location: "Miami, USA",
+    lastOrder: "Feb 28, 2025",
+    totalOrders: 1,
+    totalSpent: "$150.00",
+    status: "New",
+    selected: false,
+  },
+  {
+    id: 8,
+    name: "David Miller",
+    email: "david.m@example.com",
+    location: "Berlin, Germany",
+    lastOrder: "Feb 25, 2025",
+    totalOrders: 9,
+    totalSpent: "$1,820.00",
+    status: "Active",
+    selected: false,
+  },
+]);
+
+// You can add store methods here as well
+export function findClientById(id) {
+  return clients.value.find((c) => c.id === parseInt(id));
+}
