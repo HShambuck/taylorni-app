@@ -1,8 +1,14 @@
 <script setup>
 import { ref, computed, defineExpose } from "vue";
+import { useUserStore } from "@/stores/auth";
+import { useRouter } from 'vue-router';
 
-// Modal reference
+// References
 const loginModal = ref(null);
+const userStore = useUserStore();
+const router = useRouter();
+const loginError = ref('');
+const isLoading = ref(false);
 
 // Form data
 const loginForm = ref({
@@ -17,14 +23,52 @@ const closeModal = () => loginModal.value.close();
 
 // Form validation
 const formValid = computed(() => {
-  return loginForm.value.email && loginForm.value.password.length >= 8;
+  return (
+    loginForm.value.email && 
+    loginForm.value.password && 
+    loginForm.value.password.length >= 6
+  );
 });
 
 // Submit function
-const submitLogin = () => {
+const submitLogin = async () => {
   if (!formValid.value) return;
-  console.log("User logged in:", loginForm.value);
-  closeModal();
+
+  isLoading.value = true;
+  loginError.value = "";
+
+  try {
+    // Call the store login action
+    await userStore.login({
+      email: loginForm.value.email,
+      password: loginForm.value.password,
+    });
+
+    // Save to localStorage if "remember me" is checked
+    if (loginForm.value.rememberMe) {
+      localStorage.setItem(
+        "userState",
+        JSON.stringify({
+          userType: userStore.userType,
+          userInfo: userStore.userInfo,
+          isAuthenticated: userStore.isAuthenticated,
+        })
+      );
+    }
+
+    // Navigate to appropriate dashboard
+    if (userStore.userType === "designer") {
+      router.push("/designer");
+    } else {
+      router.push("/client");
+    }
+
+    closeModal();
+  } catch (error) {
+    loginError.value = error.message;
+  } finally {
+    isLoading.value = false;
+  }
 };
 
 // Forgot password handler
@@ -32,7 +76,7 @@ const forgotPassword = () => {
   console.log("Forgot password requested for:", loginForm.value.email);
 };
 
-// Expose functions to parent component (Navbar)
+// Expose modal controls to parent
 defineExpose({ openModal, closeModal });
 </script>
 
@@ -49,6 +93,10 @@ defineExpose({ openModal, closeModal });
       </div>
 
       <form @submit.prevent="submitLogin" class="space-y-4">
+        <div v-if="loginError" class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4" role="alert">
+          <p>{{ loginError }}</p>
+        </div>
+
         <div>
           <label class="block text-gray-700 text-sm font-medium mb-1">Email</label>
           <input type="email" v-model="loginForm.email" class="w-full px-3 py-2 border rounded-md focus:ring-amber-500" required />
@@ -67,8 +115,10 @@ defineExpose({ openModal, closeModal });
           <a href="#" @click.prevent="forgotPassword" class="text-sm text-amber-500 hover:underline">Forgot password?</a>
         </div>
 
-        <button type="submit" class="w-full py-3 px-4 bg-amber-500 text-white rounded-md hover:bg-amber-600" :disabled="!formValid">
-          Sign In
+        <button type="submit" class="w-full py-3 px-4 bg-amber-500 text-white rounded-md hover:bg-amber-600" 
+          :disabled="!formValid || isLoading">
+          <span v-if="isLoading">Signing in...</span>
+          <span v-else>Sign In</span>
         </button>
 
         <div class="text-center mt-4">

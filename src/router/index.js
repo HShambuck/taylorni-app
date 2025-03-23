@@ -1,40 +1,50 @@
 import { createRouter, createWebHistory } from "vue-router";
+import { useUserStore } from "@/stores/auth";
 
 // Public Views
-import LandingPage from "@/views/LandingPage.vue";
-import About from "@/views/About.vue";
-import Contact from "@/views/Contact.vue";
+const LandingPage = () => import("@/views/LandingPage.vue");
+const About = () => import("@/views/About.vue");
+const Contact = () => import("@/views/Contact.vue");
+
+// Unified Dashboard
+const LoginModal = () => import("@/components/ui/LoginModal.vue");
+const SignupModal = () => import("@/components/ui/SignupModal.vue");
+const Profile = () => import("@/views/Profile.vue");
+const EditProfile = () => import("@/views/EditProfile.vue");
+const Dashboard = () => import("@/components/Dashboard.vue"); // Unified Client/Designer Dashboard
 
 // Client Views
-import ClientDashboard from "@/views/client/ClientDashboard.vue";
-import ClientOrders from "@/components/client/ClientOrders.vue";
-import ClientOrderDetails from "@/components/client/ClientOrderDetails.vue";
-import ClientMeasurements from "@/components/client/ClientMeasurements.vue";
-import ClientMarketplace from "@/components/client/ClientMarketplace.vue";
-import ProductDetails from "@/components/client/ProductDetails.vue";
-import ShoppingCart from "../views/client/ShoppingCart.vue";
-import CustomOrderForm from "../components/client/CustomOrderForm.vue";
-import ClientCustomOrders from "@/views/client/ClientCustomOrders.vue";
-import VirtualTryOn from "@/components/client/VirtualTryOn.vue";
-import ClientProfile from "@/components/client/ClientProfile.vue";
+const ClientOverview = () => import("@/components/client/ClientOverview.vue");
+const ClientOrders = () => import("@/components/client/ClientOrders.vue");
+const ClientOrderDetails = () =>
+  import("@/components/client/ClientOrderDetails.vue");
+const ClientMeasurements = () =>
+  import("@/components/client/ClientMeasurements.vue");
+const ClientMarketplace = () =>
+  import("@/components/client/ClientMarketplace.vue");
+const ProductDetails = () => import("@/components/client/ProductDetails.vue");
+const ShoppingCart = () => import("@/views/client/ShoppingCart.vue");
+const CustomOrderForm = () => import("@/components/client/CustomOrderForm.vue");
+const ClientCustomOrders = () =>
+  import("@/views/client/ClientCustomOrders.vue");
+const VirtualTryOn = () => import("@/components/client/VirtualTryOn.vue");
 
 // Designer Views
-import DesignerDashboard from "@/views/designer/DesignerDashboard.vue";
-import DesignerCustomOrders from "@/views/designer/DesignerCustomOrders.vue";
-import DesignerShop from "../views/designer/DesignerShop.vue";
-import DesignerOrderMgt from "@/views/designer/DesignerOrderMgt.vue";
-import DesignerClients from "@/components/designer/DesignerClients.vue";
-import ManageDesigns from "@/components/designer/ManageDesigns.vue";
-import DesignerMarketplace from "@/components/designer/DesignerMarketplace.vue";
-import ClientDetails from "@/components/designer/ClientDetails.vue";
-import DesignerOrderDetails from "@/components/designer/DesignerOrderDetails.vue";
-import DesignerOrders from "@/components/designer/DesignerOrders.vue";
-import DesignerProducts from "@/components/designer/DesignerProducts.vue";
-import DesignerProfile from "@/components/designer/DesignerProfile.vue";
-import DesignerShopSettings from "@/components/designer/DesignerShopSettings.vue";
-import DesignerTryOn from "@/components/designer/DesignerTryOn.vue";
+const DesignerOverview = () =>
+  import("@/components/designer/DesignerOverview.vue");
+const DesignerOrders = () => import("@/components/designer/DesignerOrders.vue");
+const DesignerClients = () =>
+  import("@/components/designer/DesignerClients.vue");
+const ManageDesigns = () => import("@/components/designer/ManageDesigns.vue");
+const DesignerMarketplace = () =>
+  import("@/components/designer/DesignerMarketplace.vue");
+const ClientDetails = () => import("@/components/designer/ClientDetails.vue");
+const DesignerShopSettings = () =>
+  import("@/components/designer/DesignerShopSettings.vue");
+const DesignerTryOn = () => import("@/components/designer/DesignerTryOn.vue");
 
-
+// Fallback View
+const NotFound = () => import("@/views/NotFound.vue");
 
 const routes = [
   // Public Routes
@@ -53,18 +63,16 @@ const routes = [
     component: Contact,
     meta: { showNav: true, showFooter: true },
   },
-
-  // Client Routes
+  { path: "/login", component: LoginModal },
+  { path: "/signup", component: SignupModal },
+  // Unified Client Dashboard
   {
     path: "/client",
-    component: ClientDashboard,
+    component: Dashboard, // Unified Dashboard Component
     children: [
-      {
-        path: "",
-        component: () => import("@/components/client/ClientOverview.vue"),
-      },
+      { path: "", component: ClientOverview },
       { path: "orders", component: ClientOrders },
-      { path: "orders/:id", component: ClientOrderDetails },
+      { path: "orders/:id", component: ClientOrderDetails, props: true },
       { path: "measurements", component: ClientMeasurements },
       { path: "marketplace", component: ClientMarketplace },
       { path: "product/:id", component: ProductDetails, props: true },
@@ -72,26 +80,37 @@ const routes = [
       { path: "custom-order", component: CustomOrderForm },
       { path: "my-custom-orders", component: ClientCustomOrders },
       { path: "try-on", component: VirtualTryOn },
-      { path: "profile", component: ClientProfile },
+      {
+        path: "/profile",
+        component: Profile,
+        children: [{ path: "edit", component: EditProfile }],
+        meta: { requiresAuth: true }, // Ensure the user is authenticated
+      },
     ],
     meta: { showNav: false, showFooter: false },
   },
 
-  // Designer Routes
+  // Unified Designer Dashboard
   {
     path: "/designer",
-    component: DesignerDashboard,
+    component: Dashboard, // Unified Dashboard Component
     children: [
-      {
-        path: "",
-        component: () => import("@/components/designer/DesignerOverview.vue"),
-      }, 
-      {path: "orders", component: DesignerOrders},
-      {path: "clients", component: DesignerClients},
-      {path: "clients/:id", component: ClientDetails, props: true},
-      {path: "designs", component: ManageDesigns},
-      {path: "marketplace", component: DesignerMarketplace},
+      { path: "", component: DesignerOverview },
+      { path: "orders", component: DesignerOrders },
+      { path: "clients", component: DesignerClients },
+      { path: "clients/:id", component: ClientDetails, props: true },
+      { path: "designs", component: ManageDesigns },
+      { path: "marketplace", component: DesignerMarketplace },
+      { path: "settings", component: DesignerShopSettings },
+      { path: "try-on", component: DesignerTryOn },
     ],
+    meta: { showNav: false, showFooter: false },
+  },
+
+  // Fallback 404 Route
+  {
+    path: "/:pathMatch(.*)*",
+    component: NotFound,
     meta: { showNav: false, showFooter: false },
   },
 ];
@@ -99,6 +118,20 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(),
   routes,
+});
+
+// Navigation Guard
+router.beforeEach((to, from, next) => {
+  const userStore = useUserStore();
+
+  // Check if the route requires authentication
+  if (to.meta.requiresAuth && !userStore.isAuthenticated) {
+    // Redirect to login if not authenticated
+    next("/login");
+  } else {
+    // Proceed to the route
+    next();
+  }
 });
 
 export default router;

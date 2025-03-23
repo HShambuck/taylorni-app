@@ -1,3 +1,101 @@
+<script setup>
+import { ref, computed, defineExpose } from "vue";
+import { useUserStore } from "@/stores/auth"; // Adjust path as needed
+import { useRouter } from "vue-router";
+
+const userStore = useUserStore();
+const router = useRouter();
+
+// Reactive form state
+const signupForm = ref({
+  firstName: "",
+  lastName: "",
+  email: "",
+  password: "",
+  confirmPassword: "",
+  userType: "client", // Default value
+  acceptTerms: false,
+});
+
+// Modal reference
+const signupModal = ref(null);
+
+// Computed property to validate form
+const formValid = computed(() => {
+  return (
+    signupForm.value.firstName &&
+    signupForm.value.lastName &&
+    signupForm.value.email &&
+    signupForm.value.password &&
+    signupForm.value.password === signupForm.value.confirmPassword &&
+    signupForm.value.password.length >= 6 &&
+    signupForm.value.acceptTerms
+  );
+});
+
+// Modal functions
+const openModal = () => {
+  signupModal.value?.showModal();
+};
+
+const closeModal = () => {
+  signupModal.value?.close();
+};
+
+// Form submission
+const submitSignup = async () => {
+  console.log("Submit button clicked"); // Debug Log
+
+  if (!formValid.value) {
+    alert("Please fill in all required fields correctly.");
+    return;
+  }
+
+  const userDetails = {
+    firstName: signupForm.value.firstName,
+    lastName: signupForm.value.lastName,
+    email: signupForm.value.email,
+    password: signupForm.value.password,
+    userType: signupForm.value.userType,
+  };
+
+  try {
+    await userStore.signup(userDetails);
+    await userStore.login({ email: userDetails.email, password: userDetails.password });
+    if (userStore.userType === "designer") {
+      router.push("/designer");
+    } else {
+      router.push("/client");
+    } // Redirect to dashboard
+    closeModal();
+  } catch (error) {
+    alert(error);
+  }
+};
+
+// Reset form
+const resetForm = () => {
+  signupForm.value = {
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    userType: "client",
+    acceptTerms: false,
+  };
+};
+
+// Emit event to switch to sign-in modal
+const emit = defineEmits(["switch-to-signin"]);
+const switchToSignIn = () => {
+  emit("switch-to-signin");
+};
+
+// Expose modal controls to parent
+defineExpose({ openModal, closeModal });
+</script>
+
 <template>
   <div>    
     <!-- Sign Up Modal Dialog -->
@@ -189,68 +287,3 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'SignupModal',
-  data() {
-    return {
-      signupForm: {
-        firstName: '',
-        lastName: '',
-        email: '',
-        password: '',
-        confirmPassword: '',
-        userType: 'client', // Default value
-        acceptTerms: false
-      }
-    }
-  },
-  computed: {
-    formValid() {
-      return (
-        this.signupForm.firstName &&
-        this.signupForm.lastName &&
-        this.signupForm.email &&
-        this.signupForm.password &&
-        this.signupForm.password === this.signupForm.confirmPassword &&
-        this.signupForm.password.length >= 8 &&
-        this.signupForm.acceptTerms
-      );
-    }
-  },
-  methods: {
-    openModal() {
-      this.$refs.signupModal.showModal();
-    },
-    closeModal() {
-      this.$refs.signupModal.close();
-    },
-    submitSignup() {
-      if (this.formValid) {
-        console.log('Form submitted:', this.signupForm);
-        // Here you would typically send the form data to your backend
-        alert('Account created successfully!');
-        this.resetForm();
-        this.closeModal();
-      }
-    },
-    resetForm() {
-      this.signupForm = {
-        firstName: '',
-        lastName: '',
-        email: '',
-        password: '',
-        confirmPassword: '',
-        userType: 'client',
-        acceptTerms: false
-      };
-    },
-    switchToSignIn() {
-      // Here you would typically switch to the sign in form
-      console.log('Switch to sign in');
-      // You could emit an event to the parent component to show the sign in form instead
-      this.$emit('switch-to-signin');
-    }
-  }
-}
-</script>
