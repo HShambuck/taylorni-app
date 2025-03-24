@@ -77,7 +77,7 @@ const saveProfile = async () => {
 
 <template>
   <div>
-    <h3 class="text-xl font-bold mb-4">Edit Profile Information</h3>
+    <h3 class="text-xl font-bold mb-4 text-purple-800">Edit Profile Information</h3>
     
     <form @submit.prevent="saveProfile" class="space-y-4">
       <!-- Name Fields (2-column layout) -->

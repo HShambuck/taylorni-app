@@ -121,7 +121,7 @@ const changePassword = async () => {
 
 <template>
   <div>
-    <h3 class="text-xl font-bold mb-4">Change Password</h3>
+    <h3 class="text-xl font-bold mb-4 text-purple-800">Change Password</h3>
     
     <form @submit.prevent="changePassword" class="space-y-4 max-w-md mx-auto">
       <!-- Current Password -->

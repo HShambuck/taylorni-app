@@ -86,7 +86,7 @@ const resetToDefault = () => {
 
 <template>
   <div>
-    <h3 class="text-xl font-bold mb-4">Update Profile Picture</h3>
+    <h3 class="text-xl font-bold mb-4 text-purple-800">Update Profile Picture</h3>
     
     <div class="flex flex-col items-center mb-6">
       <!-- Profile Picture Preview -->
@@ -103,14 +103,14 @@ const resetToDefault = () => {
       <div class="flex gap-2 mb-4">
         <button 
           @click="triggerFileInput"
-          class="btn btn-primary"
+          class="btn bg-purple-800 text-white"
         >
           Select Image
         </button>
         
         <button 
           @click="resetToDefault"
-          class="btn btn-outline"
+          class="btn btn-outline text-amber-500 hover:bg-amber-600 hover:text-white"
         >
           Reset to Default
         </button>

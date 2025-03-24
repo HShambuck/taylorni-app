@@ -83,9 +83,9 @@ const routes = [
       {
         path: "/profile",
         component: Profile,
-        children: [{ path: "edit", component: EditProfile }],
         meta: { requiresAuth: true }, // Ensure the user is authenticated
       },
+      { path: "/profile/edit", name: "EditProfile", component: EditProfile },
     ],
     meta: { showNav: false, showFooter: false },
   },
@@ -103,6 +103,12 @@ const routes = [
       { path: "marketplace", component: DesignerMarketplace },
       { path: "settings", component: DesignerShopSettings },
       { path: "try-on", component: DesignerTryOn },
+      {
+        path: "/profile",
+        component: Profile,
+        meta: { requiresAuth: true }, // Ensure the user is authenticated
+      },
+      { path: "/profile/edit", name: "EditProfile", component: EditProfile },
     ],
     meta: { showNav: false, showFooter: false },
   },

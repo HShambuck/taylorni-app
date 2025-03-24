@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import features from '@/data/landingPage/features';
 import steps from '@/data/landingPage/steps'; 
 import testimonials from '@/data/landingPage/testimonials';
@@ -22,24 +22,118 @@ const about = ref({
   buttonText: "Learn more",
   image: ""
 });
+
+// Animation visibility states
+const isHeroVisible = ref(false);
+const isAboutVisible = ref(false);
+const visibleFeatures = ref([]);
+const visibleClientSteps = ref([]);
+const visibleDesignerSteps = ref([]);
+const visibleTestimonials = ref([]);
+const isCTAVisible = ref(false);
+
+// Intersection Observer setup
+onMounted(() => {
+  // Set hero as visible immediately
+  setTimeout(() => {
+    isHeroVisible.value = true;
+  }, 200);
+  
+  // Create observers for each section
+  createObserver('.about-section', () => { isAboutVisible.value = true; });
+  
+  // Features observer
+  createObserver('.features-container', () => {
+    const interval = setInterval(() => {
+      if (visibleFeatures.value.length < features.length) {
+        visibleFeatures.value.push(visibleFeatures.value.length);
+      } else {
+        clearInterval(interval);
+      }
+    }, 150);
+  });
+  
+  // Client steps observer
+  createObserver('.client-steps', () => {
+    const interval = setInterval(() => {
+      if (visibleClientSteps.value.length < clientSteps.value.length) {
+        visibleClientSteps.value.push(visibleClientSteps.value.length);
+      } else {
+        clearInterval(interval);
+      }
+    }, 200);
+  });
+  
+  // Designer steps observer
+  createObserver('.designer-steps', () => {
+    const interval = setInterval(() => {
+      if (visibleDesignerSteps.value.length < designerSteps.value.length) {
+        visibleDesignerSteps.value.push(visibleDesignerSteps.value.length);
+      } else {
+        clearInterval(interval);
+      }
+    }, 200);
+  });
+  
+  // Testimonials observer
+  createObserver('.testimonials-container', () => {
+    const interval = setInterval(() => {
+      if (visibleTestimonials.value.length < testimonials.length) {
+        visibleTestimonials.value.push(visibleTestimonials.value.length);
+      } else {
+        clearInterval(interval);
+      }
+    }, 150);
+  });
+  
+  // CTA observer
+  createObserver('.cta-section', () => { isCTAVisible.value = true; });
+});
+
+// Helper function to create observers
+function createObserver(selector, callback) {
+  const element = document.querySelector(selector);
+  if (!element) return;
+  
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        callback();
+        observer.disconnect();
+      }
+    });
+  }, { threshold: 0.2 });
+  
+  observer.observe(element);
+}
 </script>
 
 <template>
   <main>
     <!-- Hero Section -->
     <section class="min-h-screen bg-cover bg-center relative overflow-hidden" :style="{ backgroundImage: `url(${heroBg})` }">
-
       <!-- Overlay -->
       <div class="absolute inset-0 bg-linear-to-r from-black/70 to-black-0 z-0"></div>
       
       <!-- Content -->
-      <div class="container mx-auto px-20 py-16 flex items-center ">
+      <div class="container mx-auto px-20 py-16 flex items-center">
         <div class="w-1/2 pr-10 z-10 my-auto">
-          <h1 class="text-4xl lg:text-7xl font-bold text-purple-300 mb-4">{{ hero.title }}</h1>
-          <p class="text-lg lg:text-4xl font-semibold text-white mb-8">
+          <h1 
+            class="text-4xl lg:text-7xl font-bold text-purple-300 mb-4 transition-all duration-1000"
+            :class="isHeroVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-16'"
+          >
+            {{ hero.title }}
+          </h1>
+          <p 
+            class="text-lg lg:text-4xl font-semibold text-white mb-8 transition-all duration-1000 delay-300"
+            :class="isHeroVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-16'"
+          >
             {{ hero.description }}
           </p>
-          <button class="border-none bg-amber-400 hover:bg-amber-300 text-white px-6 py-5 rounded-md font-semibold lg:text-xl">
+          <button 
+            class="border-none bg-amber-400 hover:bg-amber-300 text-white px-6 py-5 rounded-md font-semibold lg:text-xl transition-all duration-500 delay-600 hover:scale-105"
+            :class="isHeroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'"
+          >
             {{ hero.buttonText }}
           </button>
         </div>
@@ -47,24 +141,35 @@ const about = ref({
     </section>
 
     <!-- About Section -->
-    <section class="bg-white py-16">
+    <section class="bg-white py-16 about-section">
       <div class="container mx-auto px-20">
-        <h2 class="text-3xl font-bold text-amber-500 text-center mb-12 relative">
+        <h2 
+          class="text-3xl font-bold text-amber-500 text-center mb-12 relative transition-all duration-700"
+          :class="isAboutVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'"
+        >
           About Us
-          <span class="absolute bottom-0 left-1/2 transform -translate-x-1/2 h-1 w-24 bg-amber-500 mt-2"></span>
+          <span 
+            class="absolute bottom-0 left-1/2 transform -translate-x-1/2 h-1 bg-amber-500 mt-2 transition-all duration-1000 delay-300"
+            :class="isAboutVisible ? 'w-24' : 'w-0'"
+          ></span>
         </h2>
         
         <div class="flex items-center gap-10">
-          <div class="w-1/2">
-            <!-- About section image would go here -->
+          <div 
+            class="w-1/2 transition-all duration-1000 delay-300"
+            :class="isAboutVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-16'"
+          >
             <img :src="aboutSec" alt="about us" w-full h-full class="rounded-lg shadow-md" />
           </div>
-          <div class="w-1/2">
+          <div 
+            class="w-1/2 transition-all duration-1000 delay-500"
+            :class="isAboutVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-16'"
+          >
             <h3 class="text-2xl font-semibold text-gray-800 mb-4">{{ about.title }}</h3>
             <p class="text-gray-600 mb-6">
               {{ about.description }}
             </p>
-            <button class="btn bg-amber-400 border-none hover:bg-amber-300 text-white px-5 py-2 rounded-md">
+            <button class="btn bg-amber-400 border-none hover:bg-amber-300 text-white px-5 py-2 rounded-md hover:scale-105 transition duration-300">
               {{ about.buttonText }}
             </button>
           </div>
@@ -72,7 +177,7 @@ const about = ref({
       </div>
     </section>
 
-      <!-- Features Section -->
+    <!-- Features Section -->
     <section class="bg-gradient-to-r from-purple-900 to-amber-500 py-16">
       <div class="container mx-auto px-20">
         <h2 class="text-3xl font-bold text-white text-center mb-12 relative">
@@ -80,8 +185,16 @@ const about = ref({
           <span class="absolute bottom-0 left-1/2 transform -translate-x-1/2 h-1 w-24 bg-amber-500 mt-2"></span>
         </h2>
         
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          <div v-for="(feature, index) in features" :key="index" class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 features-container">
+          <div 
+            v-for="(feature, index) in features" 
+            :key="index" 
+            class="bg-white p-6 rounded-lg shadow-md transition-all duration-700"
+            :class="visibleFeatures.includes(index) 
+              ? 'opacity-100 transform translate-y-0 hover:shadow-lg hover:-translate-y-2' 
+              : 'opacity-0 transform translate-y-16'"
+            :style="{ transitionDelay: `${index * 150}ms` }"
+          >
             <div class="w-16 h-16 bg-amber-400 rounded-full flex items-center justify-center mb-4 mx-auto">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-purple-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="feature.icon" />
@@ -103,10 +216,18 @@ const about = ref({
         </p>
         
         <div class="flex flex-col md:flex-row gap-8 mb-12">
-          <div class="w-full md:w-1/2">
+          <div class="w-full md:w-1/2 client-steps">
             <h3 class="text-2xl font-semibold text-purple-800 mb-6">For Clients</h3>
             <div class="space-y-8">
-              <div v-for="(step, index) in clientSteps" :key="index" class="flex items-start">
+              <div 
+                v-for="(step, index) in clientSteps" 
+                :key="index" 
+                class="flex items-start transition-all duration-700"
+                :class="visibleClientSteps.includes(index) 
+                  ? 'opacity-100 translate-x-0' 
+                  : 'opacity-0 -translate-x-16'"
+                :style="{ transitionDelay: `${index * 200}ms` }"
+              >
                 <div class="flex-shrink-0 w-10 h-10 rounded-full bg-amber-400 flex items-center justify-center mr-4">
                   <span class="font-bold text-purple-800">{{ index + 1 }}</span>
                 </div>
@@ -118,10 +239,18 @@ const about = ref({
             </div>
           </div>
           
-          <div class="w-full md:w-1/2">
+          <div class="w-full md:w-1/2 designer-steps">
             <h3 class="text-2xl font-semibold text-purple-800 mb-6">For Designers</h3>
             <div class="space-y-8">
-              <div v-for="(step, index) in designerSteps" :key="index" class="flex items-start">
+              <div 
+                v-for="(step, index) in designerSteps" 
+                :key="index" 
+                class="flex items-start transition-all duration-700"
+                :class="visibleDesignerSteps.includes(index) 
+                  ? 'opacity-100 translate-x-0' 
+                  : 'opacity-0 translate-x-16'"
+                :style="{ transitionDelay: `${index * 200}ms` }"
+              >
                 <div class="flex-shrink-0 w-10 h-10 rounded-full bg-amber-400 flex items-center justify-center mr-4">
                   <span class="font-bold text-purple-800">{{ index + 1 }}</span>
                 </div>
@@ -144,8 +273,16 @@ const about = ref({
           <span class="absolute bottom-0 left-1/2 transform -translate-x-1/2 h-1 w-24 bg-amber-500 mt-2"></span>
         </h2>
         
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div v-for="(testimonial, index) in testimonials" :key="index" class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 testimonials-container">
+          <div 
+            v-for="(testimonial, index) in testimonials" 
+            :key="index" 
+            class="bg-white p-6 rounded-lg shadow-md transition-all duration-700"
+            :class="visibleTestimonials.includes(index) 
+              ? 'opacity-100 transform translate-y-0 hover:shadow-lg hover:-translate-y-2' 
+              : 'opacity-0 transform translate-y-16'"
+            :style="{ transitionDelay: `${index * 150}ms` }"
+          >
             <div class="flex items-center mb-4">
               <div class="w-12 h-12 bg-gray-300 rounded-full overflow-hidden mr-4">
                 <img :src="`/api/placeholder/${50+index}/${50+index}`" alt="User avatar" class="w-full h-full object-cover" />
@@ -162,13 +299,24 @@ const about = ref({
     </section>
 
     <!-- Call to Action Section -->
-    <section class="bg-purple-800 py-16 text-white">
+    <section class="bg-purple-800 py-16 text-white cta-section">
       <div class="container mx-auto px-20 text-center">
-        <h2 class="text-3xl font-bold mb-4">Ready to Transform Your Fashion Experience?</h2>
-        <p class="text-gray-200 mb-8 max-w-2xl mx-auto">
+        <h2 
+          class="text-3xl font-bold mb-4 transition-all duration-700"
+          :class="isCTAVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'"
+        >
+          Ready to Transform Your Fashion Experience?
+        </h2>
+        <p 
+          class="text-gray-200 mb-8 max-w-2xl mx-auto transition-all duration-700 delay-300"
+          :class="isCTAVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'"
+        >
           Join thousands of designers and clients who are revolutionizing the custom fashion industry.
         </p>
-        <button class="bg-amber-400 hover:bg-amber-300 text-gray-900 px-8 py-3 rounded-md font-semibold text-lg">
+        <button 
+          class="bg-amber-400 hover:bg-amber-300 text-gray-900 px-8 py-3 rounded-md font-semibold text-lg transition-all duration-700 delay-600 hover:scale-110"
+          :class="isCTAVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'"
+        >
           Sign Up for Free
         </button>
       </div>
@@ -176,3 +324,4 @@ const about = ref({
 
   </main>
 </template>
+

@@ -1,217 +1,280 @@
-import { ref } from "vue";
+import { defineStore } from "pinia";
+import { ref, computed } from "vue";
 
-// This creates a reactive clients array that can be shared across components
-export const clients = ref([
+// Merge client data from both sources
+const defaultClients = [
   {
     id: 1,
-    name: "Jane Doe",
+    firstName: "Oscar",
+    lastName: "Essuon",
+    email: "oscar@gmail.com",
+    password: "123456",
+    userType: "client",
+    acceptTerms: true,
+    location: "Accra, Ghana",
+    lastOrder: "Mar 10, 2025",
+    totalOrders: 3,
+    totalSpent: "$580.00",
+    status: "Active",
+  },
+  {
+    id: 2,
+    firstName: "Brightmore",
+    lastName: "Quansah",
+    email: "more@gmail.com",
+    password: "123456",
+    userType: "client",
+    acceptTerms: true,
+    location: "Kumasi, Ghana",
+    lastOrder: "Mar 5, 2025",
+    totalOrders: 2,
+    totalSpent: "$420.00",
+    status: "Active",
+  },
+  {
+    id: 3,
+    firstName: "Alex",
+    lastName: "Apedo",
+    email: "alex@gmail.com",
+    password: "123456",
+    userType: "client",
+    acceptTerms: true,
+    location: "Tema, Ghana",
+    lastOrder: "Feb 28, 2025",
+    totalOrders: 5,
+    totalSpent: "$950.00",
+    status: "Active",
+  },
+  {
+    id: 4,
+    firstName: "Gifty",
+    lastName: "Adankai",
+    email: "gifty@gmail.com",
+    password: "123456",
+    userType: "client",
+    acceptTerms: true,
+    location: "Takoradi, Ghana",
+    lastOrder: "Mar 15, 2025",
+    totalOrders: 1,
+    totalSpent: "$150.00",
+    status: "New",
+  },
+  {
+    id: 5,
+    firstName: "Nancy",
+    lastName: "Love",
+    email: "nlat@gmail.com",
+    password: "123456",
+    userType: "client",
+    acceptTerms: true,
+    location: "Cape Coast, Ghana",
+    lastOrder: "Mar 12, 2025",
+    totalOrders: 4,
+    totalSpent: "$720.00",
+    status: "Active",
+  },
+  // Adding clients from the client store (with slight modifications to match schema)
+  {
+    id: 6,
+    firstName: "Jane",
+    lastName: "Doe",
     email: "jane.doe@example.com",
+    password: "123456",
+    userType: "client",
+    acceptTerms: true,
     location: "New York, USA",
     lastOrder: "Mar 15, 2025",
     totalOrders: 8,
     totalSpent: "$1,200.00",
     status: "Active",
-    selected: false,
   },
   {
-    id: 2,
-    name: "John Smith",
+    id: 7,
+    firstName: "John",
+    lastName: "Smith",
     email: "john.smith@example.com",
+    password: "123456",
+    userType: "client",
+    acceptTerms: true,
     location: "Los Angeles, USA",
     lastOrder: "Mar 14, 2025",
     totalOrders: 12,
     totalSpent: "$2,450.00",
     status: "Active",
-    selected: false,
   },
   {
-    id: 3,
-    name: "Alice Johnson",
+    id: 8,
+    firstName: "Alice",
+    lastName: "Johnson",
     email: "alice.j@example.com",
+    password: "123456",
+    userType: "client",
+    acceptTerms: true,
     location: "London, UK",
     lastOrder: "Mar 13, 2025",
     totalOrders: 3,
     totalSpent: "$650.00",
     status: "New",
-    selected: false,
   },
   {
-    id: 4,
-    name: "Robert Wilson",
+    id: 9,
+    firstName: "Robert",
+    lastName: "Wilson",
     email: "robert.w@example.com",
+    password: "123456",
+    userType: "client",
+    acceptTerms: true,
     location: "Chicago, USA",
     lastOrder: "Mar 10, 2025",
     totalOrders: 6,
     totalSpent: "$980.00",
     status: "Active",
-    selected: false,
   },
   {
-    id: 5,
-    name: "Sarah Davis",
+    id: 10,
+    firstName: "Sarah",
+    lastName: "Davis",
     email: "sarah.d@example.com",
+    password: "123456",
+    userType: "client",
+    acceptTerms: true,
     location: "Toronto, Canada",
     lastOrder: "Mar 5, 2025",
     totalOrders: 2,
     totalSpent: "$350.00",
     status: "New",
-    selected: false,
   },
-  {
-    id: 6,
-    name: "Michael Brown",
-    email: "michael.b@example.com",
-    location: "Sydney, Australia",
-    lastOrder: "Mar 3, 2025",
-    totalOrders: 4,
-    totalSpent: "$720.00",
-    status: "Active",
-    selected: false,
-  },
-  {
-    id: 7,
-    name: "Lisa Garcia",
-    email: "lisa.g@example.com",
-    location: "Miami, USA",
-    lastOrder: "Feb 28, 2025",
-    totalOrders: 1,
-    totalSpent: "$150.00",
-    status: "New",
-    selected: false,
-  },
-  {
-    id: 8,
-    name: "David Miller",
-    email: "david.m@example.com",
-    location: "Berlin, Germany",
-    lastOrder: "Feb 25, 2025",
-    totalOrders: 9,
-    totalSpent: "$1,820.00",
-    status: "Active",
-    selected: false,
-  },
-  {
-    id: 9,
-    name: "Alice Johnson",
-    email: "alice@example.com",
-    phone: "+1234567890",
-    location: "New York, NY",
-    joinedDate: "2023-01-10",
-    totalSpent: 200.0,
-    status: "active",
-    avatarUrl: "path/to/image1.jpg",
-  },
+];
 
-  {
-    id: 10,
-    name: "Bob Smith",
-    email: "bob@example.com",
-    phone: "+0987654321",
-    location: "Los Angeles, CA",
-    joinedDate: "2023-01-15",
-    totalSpent: 150.0,
-    status: "active",
-    avatarUrl: "path/to/image2.jpg",
-  },
+export const useClientStore = defineStore("client", () => {
+  // State
+  const clients = ref(defaultClients);
+  const isLoading = ref(false);
+  const error = ref(null);
 
-  {
-    id: 11,
-    name: "Charlie Brown",
-    email: "charlie@example.com",
-    phone: "+1122334455",
-    location: "Chicago, IL",
-    joinedDate: "2022-12-20",
-    totalSpent: 220.0,
-    status: "inactive",
-    avatarUrl: "path/to/image3.jpg",
-  },
+  // Getters
+  const getAllClients = computed(() => clients.value);
 
-  {
-    id: 12,
-    name: "David Wilson",
-    email: "david@example.com",
-    phone: "+2233445566",
-    location: "Houston, TX",
-    joinedDate: "2023-02-05",
-    totalSpent: 300.0,
-    status: "active",
-    avatarUrl: "path/to/image4.jpg",
-  },
+  const getClientById = computed(() => {
+    return (clientId) =>
+      clients.value.find((client) => client.id === clientId) || null;
+  });
 
-  {
-    id: 13,
-    name: "Eve Davis",
-    email: "eve@example.com",
-    phone: "+3344556677",
-    location: "Phoenix, AZ",
-    joinedDate: "2023-03-15",
-    totalSpent: 180.0,
-    status: "active",
-    avatarUrl: "path/to/image5.jpg",
-  },
+  const getClientByEmail = computed(() => {
+    return (email) =>
+      clients.value.find((client) => client.email === email) || null;
+  });
 
-  {
-    id: 14,
-    name: "Frank Garcia",
-    email: "frank@example.com",
-    phone: "+4455667788",
-    location: "Philadelphia, PA",
-    joinedDate: "2023-04-01",
-    totalSpent: 320.0,
-    status: "active",
-    avatarUrl: "path/to/image6.jpg",
-  },
+  const getActiveClients = computed(() => {
+    return clients.value.filter((client) => client.status === "Active");
+  });
 
-  {
-    id: 15,
-    name: "Grace Lee",
-    email: "grace@example.com",
-    phone: "+5566778899",
-    location: "San Antonio, TX",
-    joinedDate: "2023-05-10",
-    totalSpent: 240.0,
-    status: "inactive",
-    avatarUrl: "path/to/image7.jpg",
-  },
+  const getNewClients = computed(() => {
+    return clients.value.filter((client) => client.status === "New");
+  });
 
-  {
-    id: 16,
-    name: "Hank Martinez",
-    email: "hank@example.com",
-    phone: "+6677889900",
-    location: "San Diego, CA",
-    joinedDate: "2023-06-12",
-    totalSpent: 180.0,
-    status: "active",
-    avatarUrl: "path/to/image8.jpg",
-  },
+  // Actions
+  const fetchClients = async () => {
+    isLoading.value = true;
+    error.value = null;
 
-  {
-    id: 17,
-    name: "Ivy Nelson",
-    email: "ivy@example.com",
-    phone: "+7788990011",
-    location: "Dallas, TX",
-    joinedDate: "2023-07-14",
-    totalSpent: 500.0,
-    status: "active",
-    avatarUrl: "path/to/image9.jpg",
-  },
+    try {
+      // In a real app, you would fetch clients from an API
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      // clients.value = await api.getClients();
+    } catch (err) {
+      console.error("Error fetching clients:", err);
+      error.value = "Failed to load clients";
+    } finally {
+      isLoading.value = false;
+    }
+  };
 
-  {
-    id: 18,
-    name: "Jack Robinson",
-    email: "jack@example.com",
-    phone: "+8899001122",
-    location: "San Jose, CA",
-    joinedDate: "2023-08-20",
-    totalSpent: 400.0,
-    status: "active",
-    avatarUrl: "path/to/image10.jpg",
-  },
-]);
+  const addClient = (clientData) => {
+    // Generate a new ID (in a real app, this would be handled by the backend)
+    const newId = Math.max(...clients.value.map((c) => c.id)) + 1;
 
-// You can add store methods here as well
-export function findClientById(id) {
-  return clients.value.find((c) => c.id === parseInt(id));
-}
+    const newClient = {
+      id: newId,
+      ...clientData,
+      userType: "client",
+      totalOrders: 0,
+      totalSpent: "$0.00",
+      status: "New",
+    };
+
+    clients.value.push(newClient);
+    return newClient;
+  };
+
+  const updateClient = (clientId, updatedData) => {
+    const index = clients.value.findIndex((c) => c.id === clientId);
+
+    if (index !== -1) {
+      // Merge the existing client with updated data
+      clients.value[index] = {
+        ...clients.value[index],
+        ...updatedData,
+      };
+      return clients.value[index];
+    }
+
+    return null;
+  };
+
+  const deleteClient = (clientId) => {
+    const index = clients.value.findIndex((c) => c.id === clientId);
+
+    if (index !== -1) {
+      clients.value.splice(index, 1);
+      return true;
+    }
+
+    return false;
+  };
+
+  const getClientFullName = (clientId) => {
+    const client = getClientById.value(clientId);
+    if (client) {
+      return `${client.firstName} ${client.lastName}`;
+    }
+    return "";
+  };
+
+  // Helper methods for integration with other stores
+  const getClientsForAuth = () => {
+    return clients.value.map((client) => ({
+      id: client.id,
+      firstName: client.firstName,
+      lastName: client.lastName,
+      email: client.email,
+      password: client.password,
+      userType: "client",
+      acceptTerms: client.acceptTerms || true,
+    }));
+  };
+
+  // Return all functions and state
+  return {
+    // State
+    clients,
+    isLoading,
+    error,
+
+    // Getters
+    getAllClients,
+    getClientById,
+    getClientByEmail,
+    getActiveClients,
+    getNewClients,
+
+    // Actions
+    fetchClients,
+    addClient,
+    updateClient,
+    deleteClient,
+    getClientFullName,
+    getClientsForAuth,
+  };
+});
