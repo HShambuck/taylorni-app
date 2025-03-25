@@ -1,53 +1,29 @@
 <script setup>
 import { ref, computed } from "vue";
 import { useCartStore } from "@/stores/cartStore";
-import { products } from "@/stores/productStore";
+import { useProductStore } from "@/stores/productStore";
+import { useDesignerStore } from "@/stores/designerStore";
+import { useRoute, useRouter } from "vue-router";
 
-// Sample designers data
-const designers = ref([
-  {
-    id: 1,
-    name: 'Emma Wilson',
-    bio: 'Award-winning fashion designer specializing in elegant evening wear and formal attire.',
-    avatar: '/api/placeholder/100/100',
-    rating: 4.8,
-    reviews: 42,
-    followers: 1256,
-    specialties: ['Evening Wear', 'Formal Attire', 'Gowns']
-  },
-  {
-    id: 2,
-    name: 'Sophia Chen',
-    bio: 'Creating functional, stylish everyday pieces with sustainable materials.',
-    avatar: '/api/placeholder/100/100',
-    rating: 4.7,
-    reviews: 38,
-    followers: 985,
-    specialties: ['Casual Wear', 'Sustainable Fashion', 'Denim']
-  },
-  {
-    id: 3,
-    name: 'James Mitchell',
-    bio: 'Master tailor with 15 years of experience crafting perfect suits and formal wear.',
-    avatar: '/api/placeholder/100/100',
-    rating: 4.9,
-    reviews: 56,
-    followers: 782,
-    specialties: ['Suits', 'Formal Wear', 'Tailored']
-  },
-  {
-    id: 5,
-    name: 'Priya Sharma',
-    bio: 'Blending traditional craftsmanship with contemporary designs for cultural wear.',
-    avatar: '/api/placeholder/100/100',
-    rating: 5.0,
-    reviews: 47,
-    followers: 1856,
-    specialties: ['Traditional', 'Cultural Fusion', 'Formal']
-  }
-]);
-
+const route = useRoute();
+const router = useRouter();
+const productId = route.params.id;
+const productStore = useProductStore();
+const designerStore = useDesignerStore();
 const cartStore = useCartStore();
+
+
+function goToProductDetails(id) {
+  router.push(`/products/${id}`); 
+}
+
+// Product list
+const products = computed(() => productStore.products);
+
+// Find product by ID
+const product = computed(() =>
+  productStore.products.find((item) => item.id === Number(productId))
+);
 
 // Filter states
 const searchQuery = ref('');
@@ -59,60 +35,58 @@ const minRating = ref(0);
 // Computed filtered products
 const filteredProducts = computed(() => {
   return products.value.filter(product => {
-    // Search filter
-    if (searchQuery.value && !product.name.toLowerCase().includes(searchQuery.value.toLowerCase()) && 
-        !product.description.toLowerCase().includes(searchQuery.value.toLowerCase()) &&
-        !product.designerName.toLowerCase().includes(searchQuery.value.toLowerCase())) {
+    if (searchQuery.value && ![product.name, product.description, product.designerName].some(field =>
+        field.toLowerCase().includes(searchQuery.value.toLowerCase())
+      )) {
       return false;
     }
-    
-    // Category filter
+
     if (selectedCategory.value && product.category !== selectedCategory.value) {
       return false;
     }
-    
-    // Price range filter
-    if (selectedPriceRange.value.min && product.price < selectedPriceRange.value.min) {
+
+    if (selectedPriceRange.value.min !== null && product.price < selectedPriceRange.value.min) {
       return false;
     }
-    if (selectedPriceRange.value.max && product.price > selectedPriceRange.value.max) {
+
+    if (selectedPriceRange.value.max !== null && product.price > selectedPriceRange.value.max) {
       return false;
     }
-    
-    // Rating filter
+
     if (product.rating < minRating.value) {
       return false;
     }
-    
+
     return true;
   });
 });
 
 // Computed sorted products
 const sortedProducts = computed(() => {
-  const products = [...filteredProducts.value];
-  
+  const sorted = JSON.parse(JSON.stringify(filteredProducts.value));
+
+
   switch (sortBy.value) {
     case 'featured':
-      return products.sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
+      return sorted.sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
     case 'bestSellers':
-      return products.sort((a, b) => (b.bestSeller ? 1 : 0) - (a.bestSeller ? 1 : 0));
+      return sorted.sort((a, b) => (b.bestSeller ? 1 : 0) - (a.bestSeller ? 1 : 0));
     case 'newest':
-      return products.sort((a, b) => b.id - a.id);
+      return sorted.sort((a, b) => b.id - a.id);
     case 'priceHigh':
-      return products.sort((a, b) => b.price - a.price);
+      return sorted.sort((a, b) => b.price - a.price);
     case 'priceLow':
-      return products.sort((a, b) => a.price - b.price);
+      return sorted.sort((a, b) => a.price - b.price);
     case 'rating':
-      return products.sort((a, b) => b.rating - a.rating);
+      return sorted.sort((a, b) => b.rating - a.rating);
     default:
-      return products;
+      return sorted;
   }
 });
 
 // Featured products for the hero section
 const featuredProducts = computed(() => {
-  return products.value.filter(product => product.featured).slice(0, 3);
+   return sortedProducts.value.filter(product => product.featured).slice(0, 3);
 });
 
 // Computed: Min & Max Price
@@ -142,7 +116,7 @@ const getStarRating = (rating) => {
   const fullStars = Math.floor(rating);
   const hasHalfStar = rating % 1 >= 0.5;
   const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
-  
+
   return {
     full: fullStars,
     half: hasHalfStar ? 1 : 0,
@@ -150,6 +124,8 @@ const getStarRating = (rating) => {
   };
 };
 </script>
+
+
 
 <template>
   <div class="min-h-screen bg-gray-50">
@@ -422,7 +398,7 @@ const getStarRating = (rating) => {
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                         </svg>
                       </button>
-                      <router-link :to="`/client/product/${product.id}`" class="btn btn-sm bg-purple-900 hover:bg-purple-800 text-white border-none">View</router-link>
+                      <btn @click="goToProductDetails(product.id)" class="btn btn-sm bg-purple-900 hover:bg-purple-800 text-white border-none">View</btn>
                     </div>
                   </div>
                 </div>

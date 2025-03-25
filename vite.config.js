@@ -8,6 +8,7 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "src"),
+      "@db": path.resolve(__dirname, "database"),
     },
   },
   plugins: [vue(), tailwindcss()],
