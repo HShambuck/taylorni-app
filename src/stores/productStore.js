@@ -5,7 +5,7 @@ import products from "@db/products.js"; // Import your data
 // Define the store
 export const useProductStore = defineStore("product", () => {
   // State
-  const productList = ref(products); // Make products reactive
+  const productList = ref([...products]); // Make products reactive and reate a new array to avoid direct mutation
   const selectedProductId = ref(null);
   const isLoading = ref(false);
   const error = ref(null);
@@ -30,9 +30,6 @@ export const useProductStore = defineStore("product", () => {
   };
 
   // For debugging
-    
-    
-
 
   return {
     // State

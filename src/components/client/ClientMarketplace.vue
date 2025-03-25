@@ -14,7 +14,7 @@ const cartStore = useCartStore();
 
 
 function goToProductDetails(id) {
-  router.push(`/products/${id}`); 
+  router.push(`/client/product/${id}`); 
 }
 
 // Product list

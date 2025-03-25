@@ -1,0 +1,122 @@
+[
+  {
+    "id": 1,
+    "firstName": "Ruth",
+    "lastName": "Asiedua",
+    "email": "ranbea@gmail.com",
+    "password": "123456",
+    "userType": "designer",
+    "acceptTerms": true,
+    "specialization": ["Formal Wear"],
+    "rating": 4.9,
+    "ordersCompleted": 87,
+    "yearsExperience": 8,
+    "status": "Active",
+    "createdAt": "2025-03-25T12:45:00Z",
+    "updatedAt": "2025-03-25T12:45:00Z",
+    "details": {
+      "bio": "Experienced formal wear designer with a keen eye for detail.",
+      "location": "Accra, Ghana",
+      "socials": {
+        "instagram": "@ruthstyles",
+        "facebook": "Ruth's Couture"
+      }
+    }
+  },
+  {
+    "id": 2,
+    "firstName": "Victoria",
+    "lastName": "Yeboah",
+    "email": "maavic@gmail.com",
+    "password": "123456",
+    "userType": "designer",
+    "acceptTerms": true,
+    "specialization": ["Traditional Wear"],
+    "rating": 4.7,
+    "ordersCompleted": 62,
+    "yearsExperience": 6,
+    "status": "Active",
+    "createdAt": "2025-03-20T09:30:00Z",
+    "updatedAt": "2025-03-24T18:10:00Z",
+    "details": {
+      "bio": "Blending culture with modern designs for unique traditional wear.",
+      "location": "Kumasi, Ghana",
+      "socials": {
+        "instagram": "@victoriadesigns",
+        "facebook": "Vicky's Creations"
+      }
+    }
+  },
+  {
+    "id": 3,
+    "firstName": "Beatrice",
+    "lastName": "Apaloo",
+    "email": "madambee@gmail.com",
+    "password": "123456",
+    "userType": "designer",
+    "acceptTerms": true,
+    "specialization": ["Casual Wear"],
+    "rating": 4.6,
+    "ordersCompleted": 45,
+    "yearsExperience": 5,
+    "status": "Active",
+    "createdAt": "2025-03-18T11:15:00Z",
+    "updatedAt": "2025-03-22T10:00:00Z",
+    "details": {
+      "bio": "Creating everyday fashion for comfort and style.",
+      "location": "Tema, Ghana",
+      "socials": {
+        "instagram": "@madambeeofficial",
+        "facebook": "Madam Bee's Fashion"
+      }
+    }
+  },
+  {
+    "id": 4,
+    "firstName": "Mavis",
+    "lastName": "Okyere",
+    "email": "mavis@gmail.com",
+    "password": "123456",
+    "userType": "designer",
+    "acceptTerms": true,
+    "specialization": ["Wedding Dresses"],
+    "rating": 4.8,
+    "ordersCompleted": 75,
+    "yearsExperience": 7,
+    "status": "Active",
+    "createdAt": "2025-03-15T14:20:00Z",
+    "updatedAt": "2025-03-23T16:50:00Z",
+    "details": {
+      "bio": "Turning wedding dreams into reality with elegant designs.",
+      "location": "Cape Coast, Ghana",
+      "socials": {
+        "instagram": "@mavisdresses",
+        "facebook": "Mavis Couture"
+      }
+    }
+  },
+  {
+    "id": 5,
+    "firstName": "Olivia",
+    "lastName": "Taylor",
+    "email": "olivia@gmail.com",
+    "password": "123456",
+    "userType": "designer",
+    "acceptTerms": true,
+    "specialization": ["Children's Wear"],
+    "rating": 4.5,
+    "ordersCompleted": 38,
+    "yearsExperience": 4,
+    "status": "Active",
+    "createdAt": "2025-03-10T08:00:00Z",
+    "updatedAt": "2025-03-21T09:45:00Z",
+    "details": {
+      "bio": "Fun and durable fashion for kids of all ages.",
+      "location": "Madina, Ghana",
+      "socials": {
+        "instagram": "@oliviataylorkids",
+        "facebook": "Olivia's Kids Wear"
+      }
+    }
+  }
+]
