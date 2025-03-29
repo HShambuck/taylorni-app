@@ -257,8 +257,13 @@ const getStarRating = (rating) => {
 };
 
 // Navigate to product details
-function goToProductDetails(id) {
-  router.push(`/client/product/${id}`);
+// function goToProductDetails(id) {
+//   router.push(`/client/product/${id}`);
+// }
+
+// Navigate to product details
+function goToProductDetails() {
+  router.push(`/client/product`);
 }
 
 // Debugging Logs

@@ -169,9 +169,9 @@ function createObserver(selector, callback) {
             <p class="text-gray-600 mb-6">
               {{ about.description }}
             </p>
-            <button class="btn bg-amber-400 border-none hover:bg-amber-300 text-white px-5 py-2 rounded-md hover:scale-105 transition duration-300">
+            <router-link to="/about" class="btn bg-amber-400 border-none hover:bg-amber-300 text-white px-5 py-2 rounded-md hover:scale-105 transition duration-300">
               {{ about.buttonText }}
-            </button>
+            </router-link>
           </div>
         </div>
       </div>

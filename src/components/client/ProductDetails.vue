@@ -1,49 +1,70 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import { useProductStore } from '@/stores/productStore';
-import { useCartStore } from '@/stores/cartStore';
+import { ref, computed } from 'vue';
+import Bridal2 from '@/assets/bridal/Bridal_dress2.jpeg';
 
-// Route and Stores
-const route = useRoute();
-const router = useRouter();
-const productStore = useProductStore();
-const cartStore = useCartStore();
+// Hardcoded Product Data
+const productData = {
+  id: 1,
+  name: 'Elegant Silk Dress',
+  description: 'A stunning silk dress perfect for any special occasion. Featuring a flattering silhouette and luxurious fabric, this dress is sure to make you stand out.',
+  price: 249.99,
+  images: [
+    Bridal2,
+    Bridal2,
+    Bridal2,
+    Bridal2,
+    Bridal2
+  ],
+  availableSizes: ['XS', 'S', 'M', 'L', 'XL'],
+  availableColors: ['#000000', '#FFFFFF', '#FF0000', '#0000FF', '#FFC0CB'],
+  reviews: 42,
+  rating: 4.5,
+  materials: [
+    '100% Silk',
+    'Lined with Soft Cotton',
+    'Delicate Hand Embroidery'
+  ],
+  careInstructions: [
+    'Dry Clean Only',
+    'Do Not Bleach',
+    'Iron on Low Heat',
+    'Hang to Store'
+  ],
+  designer: {
+    name: 'Elena Rodriguez',
+    bio: 'Award-winning fashion designer specializing in elegant and sustainable haute couture.',
+    avatar: 'https://example.com/designer-avatar.jpg'
+  },
+  reviewList: [
+    {
+      id: 1,
+      user: {
+        name: 'Sarah Johnson',
+        avatar: 'https://example.com/user1-avatar.jpg'
+      },
+      rating: 5,
+      comment: 'Absolutely beautiful dress! The quality is exceptional and it fits perfectly.',
+      date: 'March 15, 2024'
+    },
+    {
+      id: 2,
+      user: {
+        name: 'Michael Chen',
+        avatar: 'https://example.com/user2-avatar.jpg'
+      },
+      rating: 4,
+      comment: 'Great dress, love the color and fabric. Slightly long for my height, but still looks amazing.',
+      date: 'February 22, 2024'
+    }
+  ]
+};
 
 // Reactive State
-const selectedImage = ref('');
-const selectedSize = ref('');
-const selectedColor = ref('');
+const selectedImage = ref(productData.images[0]);
+const selectedSize = ref(productData.availableSizes[0]);
+const selectedColor = ref(productData.availableColors[0]);
 const quantity = ref(1);
-
-// Safe Product Access
-const product = computed(() => {
-  const foundProduct = productStore.getProductById(Number(route.params.id));
-  return foundProduct || {
-    id: null,
-    name: 'Unknown Product',
-    description: '',
-    price: 0,
-    images: [],
-    availableSizes: [],
-    availableColors: [],
-    reviews: 0,
-    rating: 0
-  };
-});
-
-// Lifecycle Hooks
-onMounted(() => {
-  if (product.value.images?.length) {
-    selectedImage.value = product.value.images[0];
-  }
-  if (product.value.availableSizes?.length) {
-    selectedSize.value = product.value.availableSizes[0];
-  }
-  if (product.value.availableColors?.length) {
-    selectedColor.value = product.value.availableColors[0];
-  }
-});
+const activeTab = ref('details');
 
 // Methods
 function increaseQuantity() {
@@ -55,20 +76,19 @@ function decreaseQuantity() {
 }
 
 function addToCart() {
-  if (!product.value.id) return;
-
-  const cartItem = {
-    ...product.value,
+  // Placeholder for cart functionality
+  console.log('Added to cart:', {
+    ...productData,
     selectedSize: selectedSize.value,
     selectedColor: selectedColor.value,
     quantity: quantity.value
-  };
-  cartStore.addToCart(cartItem);
+  });
 }
 
 function buyNow() {
   addToCart();
-  router.push('/checkout');
+  // Placeholder for checkout navigation
+  console.log('Navigating to checkout');
 }
 
 function selectImage(image) {
@@ -89,7 +109,6 @@ function getStarRating(rating) {
 }
 </script>
 
-
 <template>
   <div class="bg-white min-h-screen">
     <div class="container mx-auto px-4 py-8 grid md:grid-cols-2 gap-8">
@@ -98,14 +117,14 @@ function getStarRating(rating) {
         <div class="mb-4">
           <img 
             :src="selectedImage" 
-            :alt="product.name" 
+            :alt="productData.name" 
             class="w-full h-[500px] object-cover rounded-lg shadow-md"
           />
         </div>
         
         <div class="grid grid-cols-5 gap-2">
           <div 
-            v-for="(image, index) in product.images" 
+            v-for="(image, index) in productData.images" 
             :key="index"
             @click="selectedImage = image"
             class="cursor-pointer border rounded-md overflow-hidden"
@@ -122,37 +141,37 @@ function getStarRating(rating) {
       
       <!-- Product Details -->
       <div>
-        <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ product.name }}</h1>
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ productData.name }}</h1>
         
         <div class="flex items-center mb-4">
           <div class="flex items-center mr-4">
-            <template v-for="i in getStarRating(product.rating).full" :key="`full-${i}`">
+            <template v-for="i in getStarRating(productData.rating).full" :key="`full-${i}`">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
               </svg>
             </template>
-            <template v-for="i in getStarRating(product.rating).half" :key="`half-${i}`">
+            <template v-for="i in getStarRating(productData.rating).half" :key="`half-${i}`">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
               </svg>
             </template>
-            <template v-for="i in getStarRating(product.rating).empty" :key="`empty-${i}`">
+            <template v-for="i in getStarRating(productData.rating).empty" :key="`empty-${i}`">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-300" viewBox="0 0 20 20" fill="currentColor">
                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
               </svg>
             </template>
-            <span class="ml-2 text-gray-600">({{ product.reviews }} reviews)</span>
+            <span class="ml-2 text-gray-600">({{ productData.reviews }} reviews)</span>
           </div>
         </div>
         
         <div class="mb-4">
-          <span class="text-2xl font-bold text-purple-800">₵{{ product.price.toFixed(2) }}</span>
+          <span class="text-2xl font-bold text-purple-800">₵{{ productData.price.toFixed(2) }}</span>
           <p class="text-sm text-gray-500 mt-1">Tax included. Shipping calculated at checkout.</p>
         </div>
         
         <div class="mb-6">
           <h3 class="font-semibold mb-2">Description</h3>
-          <p class="text-gray-700">{{ product.description }}</p>
+          <p class="text-gray-700">{{ productData.description }}</p>
         </div>
         
         <!-- Size Selection -->
@@ -160,7 +179,7 @@ function getStarRating(rating) {
           <h3 class="font-semibold mb-2">Size</h3>
           <div class="flex space-x-2">
             <button 
-              v-for="size in product.availableSizes" 
+              v-for="size in productData.availableSizes" 
               :key="size"
               @click="selectedSize = size"
               class="px-4 py-2 border rounded-md transition-colors"
@@ -178,7 +197,7 @@ function getStarRating(rating) {
           <h3 class="font-semibold mb-2">Color</h3>
           <div class="flex space-x-2">
             <button 
-              v-for="color in product.availableColors" 
+              v-for="color in productData.availableColors" 
               :key="color"
               @click="selectedColor = color"
               class="w-8 h-8 rounded-full border-2 transition-all"
@@ -230,13 +249,13 @@ function getStarRating(rating) {
         <div class="mt-8 border-t pt-4">
           <div class="flex items-center">
             <img 
-              :src="product.designer.avatar" 
-              :alt="product.designer.name" 
+              :src="productData.designer.avatar" 
+              :alt="productData.designer.name" 
               class="w-12 h-12 rounded-full mr-4"
             />
             <div>
-              <h4 class="font-semibold text-gray-800">{{ product.designer.name }}</h4>
-              <p class="text-sm text-gray-600">{{ product.designer.bio }}</p>
+              <h4 class="font-semibold text-gray-800">{{ productData.designer.name }}</h4>
+              <p class="text-sm text-gray-600">{{ productData.designer.bio }}</p>
             </div>
           </div>
         </div>
@@ -263,7 +282,7 @@ function getStarRating(rating) {
               ? 'text-purple-800 border-b-2 border-purple-800' 
               : 'text-gray-500 hover:text-gray-700'"
           >
-            Reviews ({{ product.reviews }})
+            Reviews ({{ productData.reviews }})
           </button>
         </nav>
       </div>
@@ -275,7 +294,7 @@ function getStarRating(rating) {
             <div>
               <h4 class="font-medium mb-2">Materials</h4>
               <ul class="list-disc list-inside text-gray-700">
-                <li v-for="material in product.materials" :key="material">
+                <li v-for="material in productData.materials" :key="material">
                   {{ material }}
                 </li>
               </ul>
@@ -283,7 +302,7 @@ function getStarRating(rating) {
             <div>
               <h4 class="font-medium mb-2">Care Instructions</h4>
               <ul class="list-disc list-inside text-gray-700">
-                <li v-for="instruction in product.careInstructions" :key="instruction">
+                <li v-for="instruction in productData.careInstructions" :key="instruction">
                   {{ instruction }}
                 </li>
               </ul>
@@ -293,7 +312,7 @@ function getStarRating(rating) {
         
         <div v-else-if="activeTab === 'reviews'">
           <h3 class="text-xl font-semibold mb-4">Customer Reviews</h3>
-          <div v-for="review in product.reviewList" :key="review.id" class="border-b pb-4 mb-4">
+          <div v-for="review in productData.reviewList" :key="review.id" class="border-b pb-4 mb-4">
             <div class="flex items-center mb-2">
               <img 
                 :src="review.user.avatar" 

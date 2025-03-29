@@ -182,7 +182,7 @@ const getTotalSpent = () => {
                 <td class="text-right font-semibold">{{ order.total }}</td>
                 <td>
                   <div class="flex gap-2">
-                    <router-link :to="`/dashboard/orders/${order.id}`" class="btn btn-sm bg-amber-500 border-none hover:bg-amber-600">
+                    <router-link :to="`/client/orders/id`" class="btn btn-sm bg-amber-500 border-none hover:bg-amber-600">
                       View
                     </router-link>
                   </div>

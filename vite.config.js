@@ -5,10 +5,10 @@ import path from "node:path";
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: "/",
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "src"),
-      "@db": path.resolve(__dirname, "database"),
+      "@": path.resolve(__dirname, "src")
     },
   },
   plugins: [vue(), tailwindcss()],

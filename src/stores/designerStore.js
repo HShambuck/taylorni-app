@@ -1,12 +1,56 @@
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
-import defaultDesigners from "@db/designers.json";
 
 export const useDesignerStore = defineStore("designer", () => {
   // State
-  const designers = ref(defaultDesigners);
+  const designers = ref([]);
   const isLoading = ref(false);
   const error = ref(null);
+
+  // Utility Function - Save to LocalStorage
+  const saveToLocalStorage = () => {
+    localStorage.setItem("designers", JSON.stringify(designers.value));
+  };
+
+  // Fetch designers from localStorage or JSON file
+  const fetchDesigners = async () => {
+    isLoading.value = true;
+    error.value = null;
+
+    try {
+      // First check if we have data in localStorage
+      const storedDesigners = localStorage.getItem("designers");
+
+      if (storedDesigners) {
+        // Use localStorage data if available
+        designers.value = JSON.parse(storedDesigners);
+      } else {
+        // Otherwise fetch from the JSON file
+        try {
+          const response = await fetch("/database/designers.json", {
+            headers: { "Content-Type": "application/json" },
+          });
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+
+          const data = await response.json();
+          designers.value = data;
+
+          // Store in localStorage for future use
+          saveToLocalStorage();
+        } catch (fetchError) {
+          saveToLocalStorage();
+        }
+      }
+    } catch (err) {
+      console.error("Error loading designers:", err);
+      error.value = "Failed to load designers";
+    } finally {
+      isLoading.value = false;
+    }
+  };
 
   // Getters
   const getAllDesigners = computed(() => designers.value);
@@ -26,26 +70,15 @@ export const useDesignerStore = defineStore("designer", () => {
   });
 
   // Actions
-  const fetchDesigners = async () => {
-    isLoading.value = true;
-    error.value = null;
-
-    try {
-      // In a real app, you would fetch designers from an API
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      // designers.value = await api.getDesigners();
-    } catch (err) {
-      console.error("Error fetching designers:", err);
-      error.value = "Failed to load designers";
-    } finally {
-      isLoading.value = false;
-    }
-  };
-
   const addDesigner = (designerData) => {
-    // Generate a new ID (in a real app, this would be handled by the backend)
-    const newId = Math.max(...designers.value.map((d) => d.id)) + 1;
+    // Make sure designers are loaded
+    if (designers.value.length === 0) {
+      fetchDesigners();
+    }
+
+    const newId = designers.value.length
+      ? Math.max(...designers.value.map((d) => d.id)) + 1
+      : 1;
 
     const newDesigner = {
       id: newId,
@@ -53,10 +86,19 @@ export const useDesignerStore = defineStore("designer", () => {
       userType: "designer",
       rating: 0,
       ordersCompleted: 0,
-      status: "Active",
+      status: "New", // Default new designer status
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      details: {
+        bio: designerData.bio || "",
+        location: designerData.location || "",
+        socials: designerData.socials || { instagram: "", facebook: "" },
+      },
+      specialization: designerData.specialization || [],
     };
 
     designers.value.push(newDesigner);
+    saveToLocalStorage(); // Persist data
     return newDesigner;
   };
 
@@ -64,11 +106,13 @@ export const useDesignerStore = defineStore("designer", () => {
     const index = designers.value.findIndex((d) => d.id === designerId);
 
     if (index !== -1) {
-      // Merge the existing designer with updated data
       designers.value[index] = {
         ...designers.value[index],
         ...updatedData,
+        updatedAt: new Date().toISOString(),
       };
+
+      saveToLocalStorage(); // Persist data
       return designers.value[index];
     }
 
@@ -80,6 +124,7 @@ export const useDesignerStore = defineStore("designer", () => {
 
     if (index !== -1) {
       designers.value.splice(index, 1);
+      saveToLocalStorage(); // Persist data
       return true;
     }
 
@@ -88,13 +133,9 @@ export const useDesignerStore = defineStore("designer", () => {
 
   const getDesignerFullName = (designerId) => {
     const designer = getDesignerById.value(designerId);
-    if (designer) {
-      return `${designer.firstName} ${designer.lastName}`;
-    }
-    return "";
+    return designer ? `${designer.firstName} ${designer.lastName}` : "";
   };
 
-  // Helper methods for integration with other stores
   const getDesignersForAuth = () => {
     return designers.value.map((designer) => ({
       id: designer.id,

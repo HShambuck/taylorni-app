@@ -61,13 +61,9 @@ const submitSignup = async () => {
 
   try {
     await userStore.signup(userDetails);
-    await userStore.login({ email: userDetails.email, password: userDetails.password });
-    if (userStore.userType === "designer") {
-      router.push("/designer");
-    } else {
-      router.push("/client");
-    } // Redirect to dashboard
     closeModal();
+    switchToSignIn(); // This will emit the "switch-to-signin" event
+    // Optional: Add a success message here
   } catch (error) {
     alert(error);
   }

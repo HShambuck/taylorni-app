@@ -99,9 +99,9 @@ const goBack = () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-green-50">
+  <div class="min-h-screen bg-amber-50">
     <!-- Header with Back Button -->
-    <div class="bg-gray-700 text-white p-4 flex items-center">
+    <div class="bg-amber-500 text-white p-4 flex items-center">
       <button @click="goBack" class="mr-3">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -114,7 +114,7 @@ const goBack = () => {
     <div class="p-6 max-w-md mx-auto">
       <!-- Order Summary -->
       <div class="mb-8">
-        <h1 class="text-3xl font-bold text-green-800 mb-1">Track your custom order</h1>
+        <h1 class="text-3xl font-bold text-purple-900 mb-1">Track your custom order</h1>
         <p class="text-gray-600">Order #{{ order.id }}</p>
       </div>
 
@@ -125,7 +125,7 @@ const goBack = () => {
             <div class="text-4xl font-bold">{{ order.deliveryTime }}</div>
             <div class="text-gray-500 text-sm mt-1">Estimated time of completion</div>
           </div>
-          <div class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
+          <div class="bg-amber-100 text-amber-800 px-3 py-1 rounded-full text-sm font-medium">
             {{ progressPercentage }}% Complete
           </div>
         </div>
@@ -144,7 +144,7 @@ const goBack = () => {
             <!-- Status Circle -->
             <div 
               class="w-10 h-10 rounded-full flex items-center justify-center mr-4 flex-shrink-0"
-              :class="step.completed ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-400'"
+              :class="step.completed ? 'bg-amber-500 text-white' : 'bg-gray-200 text-gray-400'"
             >
               <svg v-if="step.completed" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
@@ -211,7 +211,7 @@ const goBack = () => {
 
       <!-- Contact Support Button -->
       <div class="mt-6">
-        <button class="w-full bg-green-600 text-white py-3 rounded-lg font-medium hover:bg-green-700 transition">
+        <button class="w-full bg-amber-500 text-white py-3 rounded-lg font-medium hover:bg-amber-600 transition">
           Contact Your Tailor
         </button>
       </div>
