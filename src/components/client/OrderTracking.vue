@@ -18,6 +18,7 @@ const order = ref(null);
 const isLoading = ref(true);
 const error = ref(null);
 const enhancedOrder = ref(null);
+const activeStepIndex = ref(0);
 
 // Fetch order and related details
 onMounted(async () => {
@@ -87,6 +88,8 @@ const orderSteps = computed(() => {
       description: "Your custom clothing order has been confirmed",
       stage: "Order Placed",
       progress: "Order Placed",
+      image: null,
+      video: null
     },
     {
       id: 2,
@@ -94,6 +97,8 @@ const orderSteps = computed(() => {
       description: "Creating custom patterns based on your measurements",
       stage: "Drafting Patterns",
       progress: "Pattern Making",
+      image: null,
+      video: null
     },
     {
       id: 3,
@@ -101,6 +106,8 @@ const orderSteps = computed(() => {
       description: "Your fabric is being cut according to measurements",
       stage: "Cutting Fabric",
       progress: "Fabric Cutting",
+      image: null,
+      video: null
     },
     {
       id: 4,
@@ -108,6 +115,8 @@ const orderSteps = computed(() => {
       description: "Your garment is being sewn by our expert tailors",
       stage: "Sewing Pieces",
       progress: "Sewing & Assembly",
+      image: null,
+      video: null
     },
     {
       id: 5,
@@ -115,6 +124,8 @@ const orderSteps = computed(() => {
       description: "Garment ready for final fitting and adjustments",
       stage: "Final Fitting",
       progress: "Fitting & Adjustments",
+      image: null,
+      video: null
     },
     {
       id: 6,
@@ -122,6 +133,8 @@ const orderSteps = computed(() => {
       description: "Final details and finishing touches",
       stage: "Finishing",
       progress: "Final Assembly & Finishing",
+      image: null,
+      video: null
     },
     {
       id: 7,
@@ -129,6 +142,8 @@ const orderSteps = computed(() => {
       description: "Your custom garment is ready to be delivered",
       stage: "Ready for Delivery",
       progress: "Packaging & Delivery",
+      image: null,
+      video: null
     },
   ];
 
@@ -136,11 +151,17 @@ const orderSteps = computed(() => {
   const currentProgressIndex = allSteps.findIndex(
     (step) => step.progress === order.value.progress
   );
+  
+  // Set active step index to current progress
+  if (activeStepIndex.value === 0 && currentProgressIndex >= 0) {
+    activeStepIndex.value = currentProgressIndex;
+  }
 
   // Mark steps as completed based on current progress
   return allSteps.map((step, index) => ({
     ...step,
     completed: index <= currentProgressIndex,
+    active: index === activeStepIndex.value,
     // Add dates and times (would come from order history in a real app)
     time: index <= currentProgressIndex ? "12:00" : "",
     date:
@@ -153,6 +174,12 @@ const orderSteps = computed(() => {
             .split("T")[0]
         : "",
   }));
+});
+
+// Get the current active step
+const currentStep = computed(() => {
+  if (!orderSteps.value.length) return null;
+  return orderSteps.value[activeStepIndex.value] || orderSteps.value[0];
 });
 
 // Calculate estimated completion time
@@ -171,6 +198,11 @@ const formatDate = (dateString) => {
 // Go back function
 const goBack = () => {
   router.push("/client/orders");
+};
+
+// Set active step function
+const setActiveStep = (index) => {
+  activeStepIndex.value = index;
 };
 </script>
 
@@ -226,7 +258,7 @@ const goBack = () => {
     </div>
 
     <!-- Main Content -->
-    <div v-if="order && !isLoading && !error" class="p-6 max-w-md mx-auto">
+    <div v-if="order && !isLoading && !error" class="p-6 max-w-6xl mx-auto">
       <!-- Order Summary -->
       <div class="mb-8">
         <h1 class="text-3xl font-bold text-purple-900 mb-1">
@@ -255,11 +287,72 @@ const goBack = () => {
         </div>
       </div>
 
-      <!-- Progress Timeline -->
-      <div class="bg-white rounded-xl shadow-md p-6">
+      <!-- Progress Timeline - Horizontal on desktop, vertical on mobile -->
+      <div class="bg-white rounded-xl shadow-md p-6 mb-6">
         <h2 class="text-xl font-bold mb-4">Order progress</h2>
 
-        <div class="relative">
+        <!-- Desktop Horizontal Timeline -->
+        <div class="hidden md:block relative mb-8">
+          <!-- Horizontal Line -->
+          <div class="absolute left-0 right-0 top-5 h-0.5 bg-gray-200"></div>
+          
+          <!-- Steps -->
+          <div class="flex justify-between relative">
+            <div 
+              v-for="(step, index) in orderSteps" 
+              :key="step.id"
+              class="flex flex-col items-center relative z-10 cursor-pointer"
+              @click="setActiveStep(index)"
+            >
+              <!-- Status Circle -->
+              <div
+                class="w-10 h-10 rounded-full flex items-center justify-center mb-2"
+                :class="{
+                  'bg-amber-500 text-white': step.completed,
+                  'bg-gray-200 text-gray-400': !step.completed,
+                  'ring-4 ring-amber-200': step.active
+                }"
+              >
+                <svg
+                  v-if="step.completed"
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+                <span v-else class="text-sm">{{ index + 1 }}</span>
+              </div>
+              
+              <!-- Step Info -->
+              <div class="w-24 text-center">
+                <h3
+                  class="font-medium text-sm"
+                  :class="{
+                    'text-black': step.completed,
+                    'text-gray-500': !step.completed,
+                    'text-amber-600': step.active
+                  }"
+                >
+                  {{ step.title }}
+                </h3>
+                <p v-if="step.date" class="text-gray-400 text-xs mt-1">
+                  {{ formatDate(step.date) }}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mobile Vertical Timeline -->
+        <div class="md:hidden relative">
           <!-- Vertical Line -->
           <div class="absolute left-5 top-2 bottom-2 w-0.5 bg-gray-200"></div>
 
@@ -267,16 +360,17 @@ const goBack = () => {
           <div
             v-for="(step, index) in orderSteps"
             :key="step.id"
-            class="flex mb-8 relative z-10"
+            class="flex mb-8 relative z-10 cursor-pointer"
+            @click="setActiveStep(index)"
           >
             <!-- Status Circle -->
             <div
               class="w-10 h-10 rounded-full flex items-center justify-center mr-4 flex-shrink-0"
-              :class="
-                step.completed
-                  ? 'bg-amber-500 text-white'
-                  : 'bg-gray-200 text-gray-400'
-              "
+              :class="{
+                'bg-amber-500 text-white': step.completed,
+                'bg-gray-200 text-gray-400': !step.completed,
+                'ring-4 ring-amber-200': step.active
+              }"
             >
               <svg
                 v-if="step.completed"
@@ -301,7 +395,11 @@ const goBack = () => {
               <div class="flex justify-between">
                 <h3
                   class="font-medium"
-                  :class="step.completed ? 'text-black' : 'text-gray-500'"
+                  :class="{
+                    'text-black': step.completed,
+                    'text-gray-500': !step.completed,
+                    'text-amber-600': step.active
+                  }"
                 >
                   {{ step.title }}
                 </h3>
@@ -315,6 +413,42 @@ const goBack = () => {
               </p>
             </div>
           </div>
+        </div>
+      </div>
+
+      <!-- Image/Video Preview Section (Canvas) -->
+      <div class="bg-white rounded-xl shadow-md p-6 mb-6">
+        <h2 class="text-xl font-bold mb-4">Your Garment Progress</h2>
+        
+        <div v-if="currentStep">
+          <div class="overflow-hidden rounded-lg mb-4 bg-gray-100">
+            <!-- Video player if available -->
+            <video 
+              v-if="currentStep.video" 
+              controls 
+              class="w-full h-64 md:h-96 object-cover"
+            >
+              <source :src="currentStep.video" type="video/mp4">
+              Your browser does not support the video tag.
+            </video>
+            
+            <!-- Image if no video -->
+            <img 
+              v-else-if="currentStep.image" 
+              :src="currentStep.image" 
+              :alt="currentStep.title" 
+              class="w-full h-64 md:h-96 object-cover"
+            />
+            
+            <!-- Placeholder if no image/video -->
+            <div v-else class="w-full h-64 md:h-96 flex items-center justify-center bg-gray-200">
+              <p class="text-gray-500">No image available at this stage</p>
+            </div>
+          </div>
+          
+          <p class="font-medium text-center text-purple-900">
+            {{ currentStep.title }}: {{ currentStep.description }}
+          </p>
         </div>
       </div>
 

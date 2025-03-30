@@ -34,7 +34,9 @@ export const useProductStore = defineStore("product", () => {
 
   // Getters
   const getProductById = (id) => {
-    return productList.value.find((product) => product.id === id) || null;
+    // Convert id to number if it's a string
+    const numId = typeof id === "string" ? parseInt(id, 10) : id;
+    return productList.value.find((product) => product.id === numId) || null;
   };
 
   const getProductsByCategory = (category) => {
