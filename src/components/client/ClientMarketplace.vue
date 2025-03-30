@@ -257,20 +257,9 @@ const getStarRating = (rating) => {
 };
 
 // Navigate to product details
-// function goToProductDetails(id) {
-//   router.push(`/client/product/${id}`);
-// }
-
-// Navigate to product details
-function goToProductDetails() {
-  router.push(`/client/product`);
+function goToProductDetails(id) {
+  router.push(`/client/product/${id}`);
 }
-
-// Debugging Logs
-console.log("Products:", productStore.products);
-console.log("Designers:", designerStore.getAllDesigners);
-console.log("Filtered Products:", filteredProducts.value);
-console.log("Sorted Products:", sortedProducts.value);
 </script>
 
 <template>

@@ -16,7 +16,7 @@ const Dashboard = () => import("@/components/Dashboard.vue"); // Unified Client/
 // Client Views
 const ClientOverview = () => import("@/components/client/ClientOverview.vue");
 const ClientOrders = () => import("@/components/client/ClientOrders.vue");
-const ClientOrderDetails = () =>
+const ClientOrderTracking = () =>
   import("@/components/client/OrderTracking.vue");
 const ClientMeasurements = () =>
   import("@/components/client/ClientMeasurements.vue");
@@ -72,11 +72,10 @@ const routes = [
     children: [
       { path: "", component: ClientOverview },
       { path: "orders", component: ClientOrders },
-      { path: "orders/id", component: ClientOrderDetails, props: true },
+      { path: "orders/:id", component: ClientOrderTracking, props: true },
       { path: "measurements", component: ClientMeasurements },
       { path: "marketplace", component: ClientMarketplace },
-      // { path: "product/:id", component: ProductDetails, props: true },
-      { path: "product", component: ProductDetails, props: true },
+      { path: "product/:id", component: ProductDetails, props: true },
       { path: "cart", component: ShoppingCart },
       { path: "custom-order", component: CustomOrderForm },
       { path: "my-custom-orders", component: ClientCustomOrders },
