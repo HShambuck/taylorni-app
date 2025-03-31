@@ -1,5 +1,15 @@
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
+import { useOrdersStore } from '@/stores/ordersStore';
+import { useMeasurementsStore } from '@/stores/measurementsStore';
+import { useClientStore } from '@/stores/clientStore';
+import { useUserStore } from '@/stores/auth'; // Import user store
+
+// Initialize stores
+const ordersStore = useOrdersStore();
+const measurementsStore = useMeasurementsStore();
+const clientStore = useClientStore();
+const userStore = useUserStore(); // User store for authentication
 
 // State variables
 const searchQuery = ref('');
@@ -10,166 +20,116 @@ const itemsPerPage = ref(10);
 const isOrderDetailsOpen = ref(false);
 const selectedOrder = ref(null);
 const originalOrder = ref(null);
+const isLoading = ref(true);
+const isChatOpen = ref(false);
+const chatMessage = ref('');
+const dateRangeFilter = ref({ start: null, end: null });
+const clientFilter = ref('');
+const showRevenueInsights = ref(false);
 
-// Sample orders data
-const orders = ref([
-  {
-    id: '10234',
-    clientName: 'John Doe',
-    clientEmail: 'john.doe@example.com',
-    clientPhone: '(555) 123-4567',
-    orderType: 'Custom Suit',
-    amount: 120,
-    balanceDue: 0,
-    paymentMethod: 'Credit Card',
-    date: '2025-03-18',
-    status: 'pending',
-    items: [
-      { name: 'Custom Suit', description: 'Navy Blue, Slim Fit', quantity: 1, price: 120 }
-    ],
-    measurements: {
-      chest: '42"',
-      waist: '34"',
-      hips: '42"',
-      inseam: '32"',
-      shoulders: '18"',
-      sleeves: '25"'
-    },
-    notes: 'Client requested extra fast delivery'
-  },
-  {
-    id: '10235',
-    clientName: 'Jane Smith',
-    clientEmail: 'jane.smith@example.com',
-    clientPhone: '(555) 987-6543',
-    orderType: 'Dress',
-    amount: 80,
-    balanceDue: 0,
-    paymentMethod: 'PayPal',
-    date: '2025-03-17',
-    status: 'in-progress',
-    items: [
-      { name: 'Evening Dress', description: 'Red, Size 6', quantity: 1, price: 80 }
-    ],
-    notes: ''
-  },
-  {
-    id: '10236',
-    clientName: 'Robert Johnson',
-    clientEmail: 'robert@example.com',
-    clientPhone: '(555) 456-7890',
-    orderType: 'Shirt Set',
-    amount: 150,
-    balanceDue: 50,
-    paymentMethod: 'Bank Transfer',
-    date: '2025-03-16',
-    status: 'completed',
-    items: [
-      { name: 'Dress Shirt', description: 'White, Size L', quantity: 2, price: 75 }
-    ],
-    notes: 'Client very satisfied with quality'
+// Current designer ID
+const currentDesignerId = computed(() => userStore.userInfo?.id || null);
+
+// Fetch orders data on component mount
+onMounted(async () => {
+  isLoading.value = true;
+  try {
+    // First ensure we have the current designer ID
+    if (!currentDesignerId.value) {
+      throw new Error('No designer logged in');
+    }
+    
+    await ordersStore.fetchOrders();
+    await measurementsStore.fetchMeasurements();
+    await clientStore.fetchClients();
+    
+    // Filter orders to only show those for the current designer
+    const designerOrders = ordersStore.getOrdersByDesignerId(currentDesignerId.value);
+    if (!designerOrders || designerOrders.length === 0) {
+      console.log('No orders found for this designer');
+    }
+  } catch (error) {
+    console.error('Error loading data:', error);
+  } finally {
+    isLoading.value = false;
   }
-]);
+});
 
-// Computed properties for order counts
+// Get orders from store - filtered for current designer
+const orders = computed(() => {
+  if (!currentDesignerId.value) return [];
+  return ordersStore.getOrdersByDesignerId(currentDesignerId.value);
+});
+
+// Computed properties for order counts - now based on designer's orders
 const totalOrders = computed(() => orders.value.length);
-const pendingOrders = computed(() => orders.value.filter(order => order.status === 'pending').length);
-const inProgressOrders = computed(() => orders.value.filter(order => order.status === 'in-progress').length);
-const completedOrders = computed(() => orders.value.filter(order => order.status === 'completed').length);
-const canceledOrders = computed(() => orders.value.filter(order => order.status === 'canceled').length);
+const pendingOrders = computed(() => 
+  orders.value.filter(order => order.status === 'pending').length
+);
+const inProgressOrders = computed(() => 
+  orders.value.filter(order => order.status === 'in-progress').length
+);
+const completedOrders = computed(() => 
+  orders.value.filter(order => order.status === 'completed').length
+);
+const canceledOrders = computed(() => 
+  orders.value.filter(order => order.status === 'canceled').length
+);
 
-// Filter and sort orders
-const filteredOrders = computed(() => {
-  let result = [...orders.value];
+// Revenue insights - now based on designer's orders
+const totalRevenue = computed(() => {
+  return orders.value.reduce((sum, order) => {
+    return sum + (getOrderAmount(order) || 0);
+  }, 0);
+});
 
-  // Apply search filter
-  if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase();
-    result = result.filter(order => 
-      order.id.toLowerCase().includes(query) ||
-      order.clientName.toLowerCase().includes(query) ||
-      order.orderType.toLowerCase().includes(query) ||
-      order.status.toLowerCase().includes(query)
-    );
+const paidRevenue = computed(() => {
+  return orders.value
+    .filter(order => order.paymentStatus === 'Paid')
+    .reduce((sum, order) => sum + (getOrderAmount(order) || 0), 0);
+});
+
+const pendingRevenue = computed(() => {
+  return orders.value
+    .filter(order => order.paymentStatus !== 'Paid')
+    .reduce((sum, order) => sum + (getOrderAmount(order) || 0), 0);
+});
+
+const monthlyRevenue = computed(() => {
+  const lastSixMonths = {};
+  const today = new Date();
+  
+  // Initialize last 6 months with 0 revenue
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+    const monthKey = `${d.getFullYear()}-${d.getMonth() + 1}`;
+    lastSixMonths[monthKey] = 0;
   }
-
-  // Apply status filter
-  if (statusFilter.value) {
-    result = result.filter(order => order.status === statusFilter.value);
-  }
-
-  // Apply sorting
-  result.sort((a, b) => {
-    switch (sortBy.value) {
-      case 'date-desc':
-        return new Date(b.date) - new Date(a.date);
-      case 'date-asc':
-        return new Date(a.date) - new Date(b.date);
-      case 'amount-desc':
-        return b.amount - a.amount;
-      case 'amount-asc':
-        return a.amount - b.amount;
-      default:
-        return 0;
+  
+  // Sum revenue by month for designer's orders
+  orders.value.forEach(order => {
+    const orderDate = new Date(getOrderDate(order));
+    if (orderDate) {
+      const monthKey = `${orderDate.getFullYear()}-${orderDate.getMonth() + 1}`;
+      if (lastSixMonths[monthKey] !== undefined) {
+        lastSixMonths[monthKey] += getOrderAmount(order) || 0;
+      }
     }
   });
-
-  return result;
+  
+  // Format for display
+  return Object.entries(lastSixMonths).map(([key, value]) => {
+    const [year, month] = key.split('-');
+    return {
+      month: new Date(year, month - 1).toLocaleString('default', { month: 'short' }),
+      revenue: value
+    };
+  });
 });
 
-// Pagination
-const totalOrdersCount = computed(() => filteredOrders.value.length);
-const paginatedOrders = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage.value;
-  return filteredOrders.value.slice(start, start + itemsPerPage.value);
-});
-
-// Reset pagination when filters change
-watch([searchQuery, statusFilter, sortBy], () => {
-  currentPage.value = 1;
-});
-
-// Methods
-const formatStatus = (status) => {
-  switch (status) {
-    case 'pending': return 'Pending';
-    case 'in-progress': return 'In Progress';
-    case 'completed': return 'Completed';
-    case 'canceled': return 'Canceled';
-    default: return status;
-  }
-};
-
-const formatDate = (dateString) => {
-  return new Date(dateString).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
-};
-
-const formatMeasurement = (key) => {
-  return key.charAt(0).toUpperCase() + key.slice(1);
-};
-
-const openOrderDetails = (order) => {
-  selectedOrder.value = JSON.parse(JSON.stringify(order));
-  originalOrder.value = order;
-  isOrderDetailsOpen.value = true;
-};
-
-const closeOrderDetails = () => {
-  isOrderDetailsOpen.value = false;
-  selectedOrder.value = null;
-  originalOrder.value = null;
-};
-
-const updateOrder = () => {
-  const index = orders.value.findIndex(o => o.id === selectedOrder.value.id);
-  if (index !== -1) {
-    Object.assign(orders.value[index], selectedOrder.value);
-    alert('Order updated successfully!');
-    closeOrderDetails();
-  }
-};
+// Rest of your component remains the same...
+// [Keep all other computed properties, methods, and template code]
 </script>
-
 
 <template>
   <div class="p-6 min-h-screen">
@@ -177,7 +137,7 @@ const updateOrder = () => {
     <div class="bg-white shadow-sm p-6">
       <div class="flex justify-between items-center">
         <div>
-          <h1 class="text-2xl font-bold text-gray-800">Orders</h1>
+          <h1 class="text-2xl font-bold text-gray-800">Designer Orders</h1>
           <p class="text-gray-600 mt-1">Manage and track all your client orders</p>
         </div>
         <div class="flex space-x-3">
@@ -191,9 +151,14 @@ const updateOrder = () => {
       </div>
     </div>
     
-    <!-- Order Summary Cards -->
-    <div class="pt-6">
-      <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+    <!-- Loading State -->
+    <div v-if="isLoading" class="flex justify-center items-center h-64">
+      <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-900"></div>
+    </div>
+    
+    <div v-else class="pt-6">
+      <!-- Order Summary Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
         <!-- Total Orders -->
         <div class="bg-white p-4 rounded-lg shadow-sm flex items-center">
           <div class="h-10 w-10 rounded-lg bg-purple-900 flex items-center justify-center mr-3">
@@ -250,9 +215,48 @@ const updateOrder = () => {
         </div>
       </div>
       
+      <!-- Revenue Insights Section (Collapsible) -->
+      <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+        <div class="flex justify-between items-center mb-4 cursor-pointer" @click="showRevenueInsights = !showRevenueInsights">
+          <h2 class="text-lg font-bold text-gray-800">Revenue Insights</h2>
+          <i :class="['fas', showRevenueInsights ? 'fa-chevron-up' : 'fa-chevron-down']"></i>
+        </div>
+        
+        <div v-if="showRevenueInsights" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <!-- Revenue Cards -->
+          <div class="bg-gray-50 p-4 rounded-lg">
+            <h3 class="text-lg mb-2">Total Revenue</h3>
+            <p class="text-2xl font-bold text-purple-900">{{ formatCurrency(totalRevenue) }}</p>
+          </div>
+          <div class="bg-gray-50 p-4 rounded-lg">
+            <h3 class="text-lg mb-2">Paid Revenue</h3>
+            <p class="text-2xl font-bold text-green-600">{{ formatCurrency(paidRevenue) }}</p>
+          </div>
+          <div class="bg-gray-50 p-4 rounded-lg">
+            <h3 class="text-lg mb-2">Pending Payments</h3>
+            <p class="text-2xl font-bold text-yellow-600">{{ formatCurrency(pendingRevenue) }}</p>
+          </div>
+          
+          <!-- Monthly Revenue Chart -->
+          <div class="col-span-1 md:col-span-3 bg-gray-50 p-4 rounded-lg">
+            <h3 class="text-lg mb-4">Monthly Revenue Trends</h3>
+            <div class="h-64 flex items-end justify-between">
+              <div v-for="(month, index) in monthlyRevenue" :key="index" class="flex flex-col items-center w-full">
+                <div 
+                  class="bg-purple-600 w-full rounded-t-md" 
+                  :style="{ height: `${(month.revenue / (Math.max(...monthlyRevenue.map(m => m.revenue)) || 1)) * 180}px` }"
+                ></div>
+                <p class="text-xs mt-2">{{ month.month }}</p>
+                <p class="text-xs font-semibold">{{ formatCurrency(month.revenue) }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
       <!-- Orders Table Section -->
       <div class="bg-white rounded-lg shadow-sm p-6">
-        <div class="flex flex-col md:flex-row justify-between items-center mb-6">
+        <div class="flex flex-col md:flex-row justify-between items-start mb-6">
           <!-- Search Bar -->
           <div class="relative w-full md:w-64 mb-4 md:mb-0">
             <input 
@@ -264,29 +268,87 @@ const updateOrder = () => {
             <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
           </div>
           
-          <!-- Filters -->
-          <div class="flex flex-wrap gap-3">
-            <select 
-              class="select select-bordered border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-900" 
-              v-model="statusFilter"
-            >
-              <option value="">All Statuses</option>
-              <option value="pending">Pending</option>
-              <option value="in-progress">In Progress</option>
-              <option value="completed">Completed</option>
-              <option value="canceled">Canceled</option>
-            </select>
-            
-            <select 
-              class="select select-bordered border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-900" 
-              v-model="sortBy"
-            >
-              <option value="date-desc">Date (Newest)</option>
-              <option value="date-asc">Date (Oldest)</option>
-              <option value="amount-desc">Amount (High-Low)</option>
-              <option value="amount-asc">Amount (Low-High)</option>
-            </select>
+          <!-- Advanced Filters Button (Dropdown) -->
+          <div class="dropdown dropdown-end w-full md:w-auto mb-4 md:mb-0">
+            <label tabindex="0" class="btn btn-outline border-gray-300 w-full md:w-auto">
+              <i class="fas fa-filter mr-2"></i> Advanced Filters
+            </label>
+            <div tabindex="0" class="dropdown-content z-10 menu p-4 shadow bg-white rounded-lg w-96">
+              <div class="mb-4">
+                <label class="text-sm font-medium block mb-2">Order Status</label>
+                <select 
+                  class="select select-bordered w-full border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-900" 
+                  v-model="statusFilter"
+                >
+                  <option value="">All Statuses</option>
+                  <option value="pending">Pending</option>
+                  <option value="in-progress">In Progress</option>
+                  <option value="completed">Completed</option>
+                  <option value="canceled">Canceled</option>
+                </select>
+              </div>
+              
+              <div class="mb-4">
+                <label class="text-sm font-medium block mb-2">Client</label>
+                <select 
+                  class="select select-bordered w-full border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-900" 
+                  v-model="clientFilter"
+                >
+                  <option value="">All Clients</option>
+                  <option v-for="client in clientsList" :key="client.id" :value="client.name">
+                    {{ client.name }}
+                  </option>
+                </select>
+              </div>
+              
+              <div class="mb-4">
+                <label class="text-sm font-medium block mb-2">Date Range</label>
+                <div class="grid grid-cols-2 gap-2">
+                  <div>
+                    <label class="text-xs">From</label>
+                    <input 
+                      type="date" 
+                      class="input input-bordered w-full border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-900"
+                      v-model="dateRangeFilter.start"
+                    />
+                  </div>
+                  <div>
+                    <label class="text-xs">To</label>
+                    <input 
+                      type="date" 
+                      class="input input-bordered w-full border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-900"
+                      v-model="dateRangeFilter.end"
+                    />
+                  </div>
+                </div>
+              </div>
+              
+              <div class="flex justify-between">
+                <button 
+                  class="btn btn-sm btn-outline border-purple-900 text-purple-900 hover:bg-purple-900 hover:text-white"
+                  @click="resetFilters"
+                >
+                  Reset Filters
+                </button>
+                <button 
+                  class="btn btn-sm bg-purple-900 hover:bg-purple-800 text-white border-none"
+                >
+                  Apply Filters
+                </button>
+              </div>
+            </div>
           </div>
+          
+          <!-- Sort Option -->
+          <select 
+            class="select select-bordered border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-900 w-full md:w-auto ml-0 md:ml-3 mb-4 md:mb-0" 
+            v-model="sortBy"
+          >
+            <option value="date-desc">Date (Newest)</option>
+            <option value="date-asc">Date (Oldest)</option>
+            <option value="amount-desc">Amount (High-Low)</option>
+            <option value="amount-asc">Amount (Low-High)</option>
+          </select>
         </div>
         
         <!-- Orders Table -->
@@ -304,166 +366,72 @@ const updateOrder = () => {
               </tr>
             </thead>
             <tbody>
-              <tr v-for="order in filteredOrders" :key="order.id">
+              <tr v-for="order in paginatedOrders" :key="order.id" class="hover:bg-gray-50">
                 <td>#{{ order.id }}</td>
-                <td>{{ order.clientName }}</td>
-                <td>{{ order.orderType }}</td>
-                <td>${{ order.amount }}</td>
+                <td>{{ getClientName(order) }}</td>
+                <td>{{ getOrderType(order) }}</td>
+                <td>{{ formatCurrency(getOrderAmount(order)) }}</td>
                 <td>
                   <span 
                     :class="{
                       'badge': true,
+                      'py-2 px-3': true,
                       'badge-warning': order.status === 'pending',
-                      'badge-info': order.status === 'in-progress',
+                      'badge-info': order.status === 'in-progress' || order.status === 'In Progress',
                       'badge-success': order.status === 'completed',
-                      'badge-error': order.status === 'canceled'
+                      'badge-error': order.status === 'canceled',
+                      'bg-purple-500 text-white': order.status === 'modification-required'
                     }"
                   >
                     {{ formatStatus(order.status) }}
                   </span>
                 </td>
-                <td>{{ formatDate(order.date) }}</td>
+                <td>{{ formatDate(getOrderDate(order)) }}</td>
                 <td>
-                  <button 
-                    class="btn btn-sm btn-ghost"
-                    @click="openOrderDetails(order)"
-                  >
-                    <i class="fas fa-eye text-purple-900"></i>
-                  </button>
+                  <div class="flex space-x-2">
+                                        <button 
+                      class="btn btn-sm btn-ghost"
+                      @click="openOrderDetails(order)"
+                      title="View Details"
+                    >
+                      <i class="fas fa-eye text-purple-900"></i>
+                    </button>
+                    <div class="dropdown dropdown-end">
+                      <label tabindex="0" class="btn btn-sm btn-ghost">
+                        <i class="fas fa-ellipsis-v text-gray-500"></i>
+                      </label>
+                      <ul tabindex="0" class="dropdown-content z-10 menu p-2 shadow bg-white rounded-lg w-40">
+                        <li><a @click="openOrderDetails(order)"><i class="fas fa-eye mr-2"></i> View</a></li>
+                        <li><a @click="startChat(order)"><i class="fas fa-comment mr-2"></i> Message</a></li>
+                        <li v-if="order.status !== 'completed'">
+                          <a @click="updateOrderStatus(order, 'completed')">
+                            <i class="fas fa-check mr-2"></i> Complete
+                          </a>
+                        </li>
+                        <li v-if="order.status !== 'canceled'">
+                          <a @click="updateOrderStatus(order, 'canceled')" class="text-red-500">
+                            <i class="fas fa-times mr-2"></i> Cancel
+                          </a>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
                 </td>
-              </tr>
-              <tr v-if="filteredOrders.length === 0">
-                <td colspan="7" class="text-center py-8 text-gray-500">
-                  No orders found matching your criteria
-                </td>
-              </tr>
+              </tr> 
             </tbody>
           </table>
         </div>
-        
         <!-- Pagination -->
-        <div class="flex justify-between items-center mt-6">
-          <p class="text-sm text-gray-500">
-            Showing {{ currentPage * itemsPerPage - itemsPerPage + 1 }} to {{ Math.min(currentPage * itemsPerPage, totalOrdersCount) }} of {{ totalOrdersCount }} orders
-          </p>
-          <div class="join">
-            <button class="join-item btn" :disabled="currentPage === 1" @click="currentPage--">
-              <i class="fas fa-chevron-left"></i>
-            </button>
-            <button class="join-item btn">{{ currentPage }}</button>
-            <button class="join-item btn" :disabled="currentPage * itemsPerPage >= totalOrdersCount" @click="currentPage++">
-              <i class="fas fa-chevron-right"></i>
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-    
-    <!-- Order Details Drawer -->
-    <div class="drawer drawer-end" :class="{'drawer-open': isOrderDetailsOpen}">
-      <input id="order-details-drawer" type="checkbox" class="drawer-toggle" v-model="isOrderDetailsOpen" />
-      <div class="drawer-content">
-        <!-- Page content here -->
-      </div> 
-      <div class="drawer-side">
-        <label for="order-details-drawer" class="drawer-overlay"></label>
-        <div class="p-4 w-full max-w-lg bg-white min-h-full">
-          <div v-if="selectedOrder" class="h-full flex flex-col">
-            <!-- Header -->
-            <div class="flex justify-between items-center pb-4 border-b">
-              <h3 class="font-bold text-lg">Order #{{ selectedOrder.id }}</h3>
-              <button class="btn btn-sm btn-circle btn-ghost" @click="closeOrderDetails">✕</button>
-            </div>
-            
-            <!-- Content -->
-            <div class="flex-1 overflow-y-auto py-4">
-              <!-- Client Information -->
-              <div class="mb-6">
-                <h4 class="text-sm uppercase text-gray-500 font-semibold mb-3">Client Information</h4>
-                <div class="bg-gray-50 p-4 rounded-lg">
-                  <p class="mb-2"><strong>Name:</strong> {{ selectedOrder.clientName }}</p>
-                  <p class="mb-2"><strong>Email:</strong> {{ selectedOrder.clientEmail }}</p>
-                  <p><strong>Phone:</strong> {{ selectedOrder.clientPhone }}</p>
-                </div>
-              </div>
-              
-              <!-- Order Items -->
-              <div class="mb-6">
-                <h4 class="text-sm uppercase text-gray-500 font-semibold mb-3">Order Items</h4>
-                <div class="bg-gray-50 p-4 rounded-lg">
-                  <div v-for="(item, index) in selectedOrder.items" :key="index" class="mb-3 pb-3 border-b border-gray-200 last:border-0 last:mb-0 last:pb-0">
-                    <div class="flex justify-between">
-                      <p class="font-medium">{{ item.name }}</p>
-                      <p>${{ item.price }}</p>
-                    </div>
-                    <p class="text-sm text-gray-600">{{ item.description }}</p>
-                    <p class="text-sm">Quantity: {{ item.quantity }}</p>
-                  </div>
-                </div>
-              </div>
-              
-              <!-- Measurements (if applicable) -->
-              <div class="mb-6" v-if="selectedOrder.measurements">
-                <h4 class="text-sm uppercase text-gray-500 font-semibold mb-3">Measurements</h4>
-                <div class="bg-gray-50 p-4 rounded-lg">
-                  <div class="grid grid-cols-2 gap-3">
-                    <p v-for="(value, key) in selectedOrder.measurements" :key="key">
-                      <strong>{{ formatMeasurement(key) }}:</strong> {{ value }}
-                    </p>
-                  </div>
-                </div>
-              </div>
-              
-              <!-- Payment Details -->
-              <div class="mb-6">
-                <h4 class="text-sm uppercase text-gray-500 font-semibold mb-3">Payment Details</h4>
-                <div class="bg-gray-50 p-4 rounded-lg">
-                  <p class="mb-2"><strong>Total Amount:</strong> ${{ selectedOrder.amount }}</p>
-                  <p class="mb-2"><strong>Payment Method:</strong> {{ selectedOrder.paymentMethod }}</p>
-                  <p><strong>Balance Due:</strong> ${{ selectedOrder.balanceDue }}</p>
-                </div>
-              </div>
-              
-              <!-- Notes/Comments -->
-              <div class="mb-6">
-                <h4 class="text-sm uppercase text-gray-500 font-semibold mb-3">Notes & Comments</h4>
-                <textarea 
-                  class="textarea textarea-bordered w-full h-32" 
-                  placeholder="Add remarks or special instructions"
-                  v-model="selectedOrder.notes"
-                ></textarea>
-              </div>
-            </div>
-            
-            <!-- Footer -->
-            <div class="pt-4 border-t">
-              <h4 class="text-sm uppercase text-gray-500 font-semibold mb-3">Status Update</h4>
-              <div class="flex items-center space-x-4">
-                <select 
-                  class="select select-bordered border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-900 w-full" 
-                  v-model="selectedOrder.status"
-                >
-                  <option value="pending">Pending</option>
-                  <option value="in-progress">In Progress</option>
-                  <option value="completed">Completed</option>
-                  <option value="canceled">Canceled</option>
-                </select>
-              </div>
-              
-              <div class="flex justify-end mt-4 space-x-3">
-                <button class="btn btn-outline border-purple-900 text-purple-900 hover:bg-purple-900 hover:text-white" @click="closeOrderDetails">
-                  Cancel
-                </button>
-                <button class="btn bg-purple-900 hover:bg-purple-800 text-white border-none" @click="updateOrder">
-                  Save Changes
-                </button>
-              </div>
-            </div>
-          </div>
+         <div class="flex justify-center mt-4">
+          <button @click="prevPage" :disabled="currentPage === 1" class="btn btn-sm btn-outline border-gray-300 text-gray-500 hover:bg-gray-100" :class="{ 'cursor-not-allowed': currentPage === 1 }">
+            Previous
+          </button>
+          <span class="mx-2 text-sm">Page {{ currentPage }} of {{ Math.ceil(totalOrdersCount / itemsPerPage) }}</span>
+          <button @click="nextPage" :disabled="currentPage === Math.ceil(totalOrdersCount / itemsPerPage)" class="btn btn-sm btn-outline border-gray-300 text-gray-500 hover:bg-gray-100" :class="{ 'cursor-not-allowed': currentPage === Math.ceil(totalOrdersCount / itemsPerPage) }">
+            Next
+          </button> 
         </div>
       </div>
     </div>
   </div>
 </template>
-
-

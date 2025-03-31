@@ -1,9 +1,16 @@
 <script setup>
 import { useCartStore } from "@/stores/cartStore";
-import { ref, computed } from 'vue';
+import { useUserStore } from "@/stores/auth";
+import { ref, computed, onMounted } from 'vue';
 
 const cartStore = useCartStore();
+const userStore = useUserStore();
 const isCheckingOut = ref(false);
+
+// Make sure cart is initialized with the correct user data
+onMounted(() => {
+  cartStore.initializeCart();
+});
 
 const handleCheckout = () => {
   isCheckingOut.value = true;
@@ -17,6 +24,8 @@ const handleCheckout = () => {
 const updateQuantity = (item, newQuantity) => {
   if (newQuantity < 1) return;
   item.quantity = newQuantity;
+  // This is handled by the watch in the store, but explicitly call it for certainty
+  cartStore.updateQuantity(item.id, newQuantity);
 };
 </script>
 
@@ -30,7 +39,7 @@ const updateQuantity = (item, newQuantity) => {
         </svg>
         Continue Shopping
       </router-link>
-    </div>
+    </div>    
 
     <div v-if="cartStore.cart.length > 0" class="bg-white rounded-lg shadow-lg">
       <div class="overflow-x-auto">

@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import { ref, computed } from "vue";
 import { useClientStore } from "./clientStore";
 import { useDesignerStore } from "./designerStore";
+import { useCartStore } from "./cartStore";
 
 const USERS_KEY = "users";
 const USER_STATE_KEY = "userState";
@@ -83,6 +84,7 @@ export const useUserStore = defineStore("user", () => {
       try {
         const clientStore = useClientStore();
         const designerStore = useDesignerStore();
+        const cartStore = useCartStore();
 
         // Check for user in client store first
         const client = clientStore.getClientByEmail(credentials.email);
@@ -120,6 +122,9 @@ export const useUserStore = defineStore("user", () => {
             })
           );
 
+          // Transfer cart items from guest to user
+          cartStore.transferGuestCart();
+
           resolve("✅ Login successful!");
         } else {
           reject("⚠️ Invalid email or password!");
@@ -137,6 +142,10 @@ export const useUserStore = defineStore("user", () => {
     userInfo.value = null;
     isAuthenticated.value = false;
     localStorage.removeItem(USER_STATE_KEY);
+
+    // Reinitialize cart for guest
+    const cartStore = useCartStore();
+    cartStore.initializeCart();
   };
 
   // Return state and methods

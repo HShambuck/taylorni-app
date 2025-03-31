@@ -315,17 +315,11 @@ const menuItems = computed(() => {
       { name: "Marketplace", path: "/client/marketplace", icon: "storefront" },
       { name: "Shopping Cart", path: "/client/cart", icon: "cart" },
       {
-        name: "Custom Orders",
-        path: "/client/my-custom-orders",
-        icon: "clipboard",
-      },
-      {
         name: "Place Custom Order",
         path: "/client/custom-order",
         icon: "plus-circle",
       },
       { name: "Virtual Try-On", path: "/client/try-on", icon: "eye" },
-      { name: "Profile", path: "/client/profile", icon: "user" },
     ];
   } else if (userType.value === "designer") {
     return [

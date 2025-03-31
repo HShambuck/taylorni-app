@@ -25,8 +25,6 @@ const ClientMarketplace = () =>
 const ProductDetails = () => import("@/components/client/ProductDetails.vue");
 const ShoppingCart = () => import("@/views/client/ShoppingCart.vue");
 const CustomOrderForm = () => import("@/components/client/CustomOrderForm.vue");
-const ClientCustomOrders = () =>
-  import("@/views/client/ClientCustomOrders.vue");
 const VirtualTryOn = () => import("@/components/client/VirtualTryOn.vue");
 
 // Designer Views
@@ -78,7 +76,6 @@ const routes = [
       { path: "product/:id", component: ProductDetails, props: true },
       { path: "cart", component: ShoppingCart },
       { path: "custom-order", component: CustomOrderForm },
-      { path: "my-custom-orders", component: ClientCustomOrders },
       { path: "try-on", component: VirtualTryOn },
       {
         path: "/profile",

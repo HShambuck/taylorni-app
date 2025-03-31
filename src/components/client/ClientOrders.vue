@@ -83,10 +83,10 @@ const formatDate = (dateString) => {
 
 // Format currency directly in component
 const formatCurrency = (amount) => {
-  if (typeof amount === 'string' && amount.startsWith('$')) {
+  if (typeof amount === 'string' && amount.startsWith('₵')) {
     return amount;
   }
-  return `$${parseFloat(amount || 0).toFixed(2)}`;
+  return `₵${parseFloat(amount || 0).toFixed(2)}`;
 };
 
 // Calculate progress percentage for an order
@@ -150,7 +150,7 @@ const getProgressPercentage = (order) => {
             </svg>
           </div>
           <div class="stat-title text-gray-800">Total Spent</div>
-          <div class="stat-value text-green-600">${{ orderStats.totalSpent }}</div>
+          <div class="stat-value text-green-600">₵{{ orderStats.totalSpent }}</div>
           <div class="stat-desc text-gray-800">Lifetime value</div>
         </div>
       </div>
