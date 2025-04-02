@@ -4,6 +4,11 @@ import { useRoute, useRouter } from "vue-router";
 import { useOrdersStore } from "@/stores/ordersStore";
 import { useUserStore } from "@/stores/auth";
 
+import patternMakingVideo from "@/assets/pattern-making.mp4";
+import cuttingVideo from "@/assets/fabric-cutting.mp4";
+import sewingVideo from "@/assets/sewing-assembling.mp4";
+
+
 // Initialize stores
 const ordersStore = useOrdersStore();
 const userStore = useUserStore();
@@ -98,7 +103,7 @@ const orderSteps = computed(() => {
       stage: "Drafting Patterns",
       progress: "Pattern Making",
       image: null,
-      video: null
+      video: patternMakingVideo
     },
     {
       id: 3,
@@ -107,7 +112,7 @@ const orderSteps = computed(() => {
       stage: "Cutting Fabric",
       progress: "Fabric Cutting",
       image: null,
-      video: null
+      video: cuttingVideo
     },
     {
       id: 4,
@@ -116,7 +121,7 @@ const orderSteps = computed(() => {
       stage: "Sewing Pieces",
       progress: "Sewing & Assembly",
       image: null,
-      video: null
+      video: sewingVideo
     },
     {
       id: 5,
@@ -425,8 +430,9 @@ const setActiveStep = (index) => {
             <!-- Video player if available -->
             <video 
               v-if="currentStep.video" 
+              :src="currentStep.video"
               controls 
-              class="w-full h-64 md:h-96 object-cover"
+              class="w-full h-64 md:h-96 object-contain"
             >
               <source :src="currentStep.video" type="video/mp4">
               Your browser does not support the video tag.
@@ -437,7 +443,7 @@ const setActiveStep = (index) => {
               v-else-if="currentStep.image" 
               :src="currentStep.image" 
               :alt="currentStep.title" 
-              class="w-full h-64 md:h-96 object-cover"
+              class="w-full h-64 md:h-96 object-contain"
             />
             
             <!-- Placeholder if no image/video -->
