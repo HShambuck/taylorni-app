@@ -4,12 +4,14 @@ import { useRouter } from "vue-router";
 import { useUserStore } from "@/stores/auth";
 import { useOrdersStore } from "@/stores/ordersStore";
 import { useDesignerStore } from "@/stores/designerStore";
+import { useClientStore } from "@/stores/clientStore"; 
 import Chart from 'chart.js/auto';
 
 const router = useRouter();
 const userStore = useUserStore();
 const ordersStore = useOrdersStore();
 const designerStore = useDesignerStore();
+const clientStore = useClientStore();
 
 // State variables
 const isLoading = ref(true);
@@ -24,6 +26,13 @@ const chartInitialized = ref(false);
 // Get current designer info
 const designerName = computed(() => {
   return userStore.userInfo ? userStore.userInfo.fullName : "Designer";
+});
+
+// Add this to your computed properties
+const getClientName = computed(() => {
+  return (clientId) => {
+    return clientStore.getClientFullName(clientId) || `Client #${clientId}`;
+  };
 });
 
 // Metrics computed based on orders data
@@ -225,7 +234,7 @@ const initEarningsChart = () => {
         labels: monthlyEarningsData.value.months,
         datasets: [
           {
-            label: 'Earnings ($)',
+            label: 'Earnings (₵)',
             data: monthlyEarningsData.value.earnings,
             backgroundColor: 'rgba(88, 28, 135, 0.7)',
             borderColor: 'rgb(88, 28, 135)',
@@ -255,7 +264,7 @@ const initEarningsChart = () => {
             position: 'left',
             title: {
               display: true,
-              text: 'Earnings ($)'
+              text: 'Earnings (₵)'
             }
           },
           y1: {
@@ -404,7 +413,7 @@ const getStatusClass = (status) => {
             <div>
               <p class="text-gray-500 text-sm font-medium">Total Earnings</p>
               <h3 class="text-2xl font-bold mt-2">
-                ${{ formattedEarnings }}
+                ₵{{ formattedEarnings }}
               </h3>
             </div>
             <div class="bg-purple-100 p-3 rounded-full">
@@ -487,14 +496,14 @@ const getStatusClass = (status) => {
                     @click="goToOrderDetails(order.id)"
                   >
                     <td class="font-medium">#{{ order.id }}</td>
-                    <td>{{ order.clientName || 'Client #' + order.clientId }}</td>
+                    <td>{{ getClientName(order.clientId) }}</td>
                     <td>{{ formatDate(order.orderDate) }}</td>
                     <td>
                       <span :class="getStatusClass(order.status)">
                         {{ order.status }}
                       </span>
                     </td>
-                    <td class="text-right">${{ (order.totalPrice || 0).toFixed(2) }}</td>
+                    <td class="text-right">₵{{ (order.totalPrice || 0).toFixed(2) }}</td>
                   </tr>
                 </tbody>
               </table>
@@ -542,7 +551,7 @@ const getStatusClass = (status) => {
                       >{{ design.orders }} orders</span
                     >
                     <span class="text-sm font-medium"
-                      >${{ design.earnings.toFixed(2) }}</span
+                      >₵{{ design.earnings.toFixed(2) }}</span
                     >
                   </div>
                 </div>

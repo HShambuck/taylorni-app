@@ -15,7 +15,7 @@ const openSignup = () => signupModal.value.openModal();
   <nav
     class="bg-linear-to-r from-amber-400 to-yellow-600 py-4 px-20 flex justify-between items-center"
   >
-    <div class="text-2xl text-white font-bold">TAYLORNI</div>
+    <div class="text-2xl text-white font-bold">TAILORNII</div>
 
     <div class="flex space-x-20 items-center">
       <div class="space-x-10 text-lg font-semibold menu-horizontal">

@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
 import { useUserStore } from "@/stores/auth";
+import DesignerMeasurements from "../components/designer/DesignerMeasurements.vue";
 
 // Public Views
 const LandingPage = () => import("@/views/LandingPage.vue");
@@ -98,6 +99,7 @@ const routes = [
       { path: "clients/:id", component: ClientDetails, props: true },
       { path: "designs", component: ManageDesigns },
       { path: "marketplace", component: DesignerMarketplace },
+      { path: "measurements", component: DesignerMeasurements },
       { path: "settings", component: DesignerShopSettings },
       { path: "try-on", component: DesignerTryOn },
       {

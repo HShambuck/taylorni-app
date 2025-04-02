@@ -1,48 +1,141 @@
 <script setup>
-import { ref, computed, reactive } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { clients } from '@/stores/clientStore';
+import { useClientStore } from '@/stores/clientStore';
+import { useOrdersStore } from '@/stores/ordersStore';
+import { useUserStore } from '@/stores/auth';
 
 const router = useRouter();
+const clientStore = useClientStore();
+const ordersStore = useOrdersStore();
+const userStore = useUserStore();
+
+// Initialize data
+onMounted(async () => {
+  if (clientStore.clients.length === 0) {
+    await clientStore.fetchClients();
+  }
+  
+  if (ordersStore.orders.length === 0) {
+    await ordersStore.fetchOrders();
+  }
+  
+  // Reset filters and pagination
+  currentPage.value = 1;
+  searchQuery.value = '';
+  statusFilter.value = '';
+});
 
 // Router
 function viewClient(id) {
   router.push(`/designer/clients/${id}`);
 }
 
-// Client Statistics
-const clientStats = ref([
+// Computed data for client stats
+const clientStats = computed(() => {
+  // Get current designer ID
+  const designerId = userStore.userInfo?.id;
+  if (!designerId) return defaultStats.value;
+  
+  const designerOrders = ordersStore.getOrdersByDesignerId(designerId);
+  
+  // Get unique client IDs from orders
+  const uniqueClientIds = [...new Set(designerOrders.map(order => order.clientId))];
+  
+  // Get clients who ordered more than once
+  const clientOrderCounts = designerOrders.reduce((acc, order) => {
+    acc[order.clientId] = (acc[order.clientId] || 0) + 1;
+    return acc;
+  }, {});
+  
+  const repeatClientIds = Object.keys(clientOrderCounts).filter(
+    clientId => clientOrderCounts[clientId] > 1
+  );
+  
+  // Get active clients (with in-progress orders)
+  const activeOrders = designerOrders.filter(order => order.status === 'In Progress');
+  const activeClientIds = [...new Set(activeOrders.map(order => order.clientId))];
+  
+  // Get new clients (ordered in the last month)
+  const lastMonth = new Date();
+  lastMonth.setMonth(lastMonth.getMonth() - 1);
+  
+  const newOrders = designerOrders.filter(order => {
+    const orderDate = new Date(order.orderDate);
+    return orderDate >= lastMonth;
+  });
+  
+  const newClientIds = [...new Set(newOrders.map(order => order.clientId))];
+  
+  return [
+    {
+      title: 'Total Clients',
+      value: uniqueClientIds.length,
+      iconBg: 'purple-100',
+      iconColor: 'text-purple-900',
+      iconPath: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z',
+      growth: uniqueClientIds.length > 0 ? `${Math.round((newClientIds.length / uniqueClientIds.length) * 100)}% this month` : '0% this month'
+    },
+    {
+      title: 'Active Clients',
+      value: activeClientIds.length,
+      iconBg: 'green-100',
+      iconColor: 'text-green-600',
+      iconPath: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z',
+      growth: activeClientIds.length > 0 ? `${Math.round((activeClientIds.length / uniqueClientIds.length) * 100)}% of total` : '0% of total'
+    },
+    {
+      title: 'New Clients',
+      value: newClientIds.length,
+      iconBg: 'blue-100',
+      iconColor: 'text-blue-600',
+      iconPath: 'M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z',
+      growth: `${newClientIds.length} this month`
+    },
+    {
+      title: 'Repeat Clients',
+      value: repeatClientIds.length,
+      iconBg: 'purple-100',
+      iconColor: 'text-purple-900',
+      iconPath: 'M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15',
+      growth: repeatClientIds.length > 0 ? `${Math.round((repeatClientIds.length / uniqueClientIds.length) * 100)}% of total` : '0% of total'
+    }
+  ];
+});
+
+// Default stats for when we don't have data yet
+const defaultStats = ref([
   {
     title: 'Total Clients',
-    value: 86,
+    value: 0,
     iconBg: 'purple-100',
     iconColor: 'text-purple-900',
     iconPath: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z',
-    growth: '8% this month'
+    growth: '0% this month'
   },
   {
     title: 'Active Clients',
-    value: 42,
+    value: 0,
     iconBg: 'green-100',
     iconColor: 'text-green-600',
     iconPath: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z',
-    growth: '12% this month'
+    growth: '0% of total'
   },
   {
     title: 'New Clients',
-    value: 14,
+    value: 0,
     iconBg: 'blue-100',
     iconColor: 'text-blue-600',
     iconPath: 'M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z',
-    growth: '5% this week'
+    growth: '0 this month'
   },
   {
     title: 'Repeat Clients',
-    value: 31,
+    value: 0,
     iconBg: 'purple-100',
     iconColor: 'text-purple-900',
     iconPath: 'M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15',
-    growth: '15% this month'
+    growth: '0% of total'
   }
 ]);
 
@@ -53,16 +146,64 @@ const selectAll = ref(false);
 const currentPage = ref(1);
 const itemsPerPage = 5;
 
+// Get designer's clients from orders
+const designerClients = computed(() => {
+  const designerId = userStore.userInfo?.id;
+  if (!designerId || !ordersStore.orders.length) return [];
+  
+  // Get all orders for this designer
+  const designerOrders = ordersStore.getOrdersByDesignerId(designerId);
+  
+  // Get unique client IDs
+  const clientIds = [...new Set(designerOrders.map(order => order.clientId))];
+  
+  // Get client details for each ID
+  const clients = clientIds.map(clientId => {
+    const client = clientStore.getClientById(clientId);
+    if (!client) return null;
+    
+    // Get all orders for this client with this designer
+    const clientOrders = designerOrders.filter(order => order.clientId === clientId);
+    
+    // Get latest order date
+    const latestOrder = clientOrders.reduce((latest, order) => {
+      return !latest || new Date(order.orderDate) > new Date(latest.orderDate) ? order : latest;
+    }, null);
+    
+    // Calculate total spent
+    const totalSpent = clientOrders.reduce((sum, order) => sum + (order.totalPrice || 0), 0);
+    
+    // Determine if client is active (has at least one active order)
+    const isActive = clientOrders.some(order => order.status === 'In Progress');
+    
+    return {
+      id: client.id,
+      name: `${client.firstName} ${client.lastName}`,
+      email: client.email,
+      location: client.location || 'N/A',
+      phone: client.phone || 'N/A',
+      lastOrder: latestOrder ? latestOrder.orderDate : 'N/A',
+      totalOrders: clientOrders.length,
+      totalSpent: ordersStore.formatCurrency(totalSpent),
+      status: isActive ? 'Active' : 'Inactive',
+      selected: false
+    };
+  }).filter(Boolean); // Remove null entries
+  
+  return clients;
+});
+
 // Computed properties
 const filteredClients = computed(() => {
-  let result = clients.value;
+  let result = designerClients.value;
   
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase();
     result = result.filter(client => 
       client.name.toLowerCase().includes(query) || 
       client.email.toLowerCase().includes(query) ||
-      client.location.toLowerCase().includes(query)
+      client.location.toLowerCase().includes(query) ||
+      (client.phone && client.phone.toLowerCase().includes(query))
     );
   }
   
@@ -77,14 +218,15 @@ const filteredClients = computed(() => {
 });
 
 const totalClients = computed(() => {
-  let result = clients.value;
+  let result = designerClients.value;
   
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase();
     result = result.filter(client => 
       client.name.toLowerCase().includes(query) || 
       client.email.toLowerCase().includes(query) ||
-      client.location.toLowerCase().includes(query)
+      client.location.toLowerCase().includes(query) ||
+      (client.phone && client.phone.toLowerCase().includes(query))
     );
   }
   
@@ -100,7 +242,7 @@ const totalPages = computed(() => {
 });
 
 const paginationStart = computed(() => {
-  return (currentPage.value - 1) * itemsPerPage + 1;
+  return totalClients.value === 0 ? 0 : (currentPage.value - 1) * itemsPerPage + 1;
 });
 
 const paginationEnd = computed(() => {
@@ -118,16 +260,15 @@ function getBadgeClass(status) {
 }
 
 function toggleSelectAll() {
-  clients.value.forEach(client => {
-  if (
-    !searchQuery.value ||
-    client.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-    client.email.toLowerCase().includes(searchQuery.value.toLowerCase())
-  ) {
-    client.selected = selectAll.value;
-  }
-});
-
+  designerClients.value.forEach(client => {
+    if (
+      !searchQuery.value ||
+      client.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+      client.email.toLowerCase().includes(searchQuery.value.toLowerCase())
+    ) {
+      client.selected = selectAll.value;
+    }
+  });
 }
 
 function prevPage() {
@@ -148,12 +289,26 @@ function goToPage(page) {
 
 function messageClient(id) {
   console.log(`Message client with ID: ${id}`);
-  // Open messaging interface
+  // Open messaging interface or redirect to messaging page
+  // router.push(`/designer/messages?client=${id}`);
 }
 
-function editClient(id) {
-  console.log(`Edit client with ID: ${id}`);
-  // Open edit client form
+function callClient(id) {
+  const client = designerClients.value.find(c => c.id === id);
+  if (client && client.phone) {
+    window.location.href = `tel:${client.phone}`;
+  } else {
+    console.log(`No phone number available for client with ID: ${id}`);
+  }
+}
+
+function emailClient(id) {
+  const client = designerClients.value.find(c => c.id === id);
+  if (client && client.email) {
+    window.location.href = `mailto:${client.email}`;
+  } else {
+    console.log(`No email available for client with ID: ${id}`);
+  }
 }
 </script>
 
@@ -249,6 +404,17 @@ function editClient(id) {
             </tr>
           </thead>
           <tbody>
+            <tr v-if="filteredClients.length === 0">
+              <td colspan="8" class="text-center py-8">
+                <div class="flex flex-col items-center justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                  </svg>
+                  <p class="text-gray-500">No clients found</p>
+                  <p class="text-gray-400 text-sm mt-1">Try adjusting your search or filter criteria</p>
+                </div>
+              </td>
+            </tr>
             <tr v-for="client in filteredClients" :key="client.id" class="hover:bg-gray-50">
               <td>
                 <label>
@@ -258,8 +424,8 @@ function editClient(id) {
               <td>
                 <div class="flex items-center space-x-3">
                   <div class="avatar">
-                    <div class="mask mask-squircle w-10 h-10">
-                      <!-- <img src="/api/placeholder/40/40" alt="Client avatar" /> -->
+                    <div class="mask mask-squircle w-10 h-10 bg-purple-100 flex items-center justify-center">
+                      <span class="text-purple-900 font-bold">{{ client.name.charAt(0) }}</span>
                     </div>
                   </div>
                   <div>
@@ -288,9 +454,9 @@ function editClient(id) {
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
                   </button>
-                  <button class="btn btn-sm btn-ghost" @click="editClient(client.id)">
+                  <button class="btn btn-sm btn-ghost" @click="callClient(client.id)">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                     </svg>
                   </button>
                 </div>
@@ -302,9 +468,14 @@ function editClient(id) {
         <!-- Pagination -->
         <div class="flex justify-between items-center p-4">
           <div class="text-sm text-gray-500">
-            Showing {{ paginationStart }}-{{ paginationEnd }} of {{ totalClients }} clients
+            <span v-if="totalClients > 0">
+              Showing {{ paginationStart }}-{{ paginationEnd }} of {{ totalClients }} clients
+            </span>
+            <span v-else>
+              No clients found
+            </span>
           </div>
-          <div class="join">
+          <div class="join" v-if="totalPages > 1">
             <button class="join-item btn btn-sm" @click="prevPage" :disabled="currentPage === 1">«</button>
             <button 
               v-for="page in totalPages" 
@@ -322,4 +493,3 @@ function editClient(id) {
     </div>
   </div>
 </template>
-

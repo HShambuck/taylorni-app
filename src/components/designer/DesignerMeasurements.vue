@@ -46,7 +46,7 @@
       <div class="flex justify-end">
         <button 
           @click="saveMeasurement" 
-          class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          class="px-4 py-2 bg-amber-500 text-white rounded hover:bg-amber-600"
           :disabled="isLoading"
         >
           {{ isLoading ? 'Saving...' : 'Save Measurement' }}
@@ -135,10 +135,10 @@
           </div>
           
           <div class="mt-6 flex justify-end">
-            <button @click="showMeasurementModal = false" class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 mr-2">
+            <button @click="showMeasurementModal = false" class="px-4 py-2 bg-purple-800 text-white rounded hover:bg-purple-900 mr-2">
               Close
             </button>
-            <button @click="editMeasurementFromModal" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+            <button @click="editMeasurementFromModal" class="px-4 py-2 bg-amber-500 text-white rounded hover:bg-amber-600">
               Edit
             </button>
           </div>
@@ -192,10 +192,10 @@
           </div>
           
           <div class="mt-6 flex justify-end">
-            <button @click="showEditModal = false" class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 mr-2">
+            <button @click="showEditModal = false" class="px-4 py-2 bg-purple-800 text-white rounded hover:bg-purple-900 mr-2">
               Cancel
             </button>
-            <button @click="saveEditedMeasurement" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+            <button @click="saveEditedMeasurement" class="px-4 py-2 bg-amber-500 text-white rounded hover:bg-amber-600">
               Save Changes
             </button>
           </div>

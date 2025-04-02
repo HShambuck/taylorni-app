@@ -76,7 +76,7 @@
               </svg>
             </div>
           </div>
-          <span class="text-2xl font-semibold text-gray-700">Taylorni</span>
+          <span class="text-2xl font-semibold text-gray-700">Tailorni</span>
         </div>
         
         <!-- Pin button (desktop only) -->
@@ -326,18 +326,13 @@ const menuItems = computed(() => {
       { name: "Overview", path: "/designer", icon: "home" },
       { name: "Orders", path: "/designer/orders", icon: "shopping-bag" },
       { name: "Clients", path: "/designer/clients", icon: "users" },
+      { name: "Measurements", path: "/designer/measurements", icon: "users" },
       {
         name: "Manage Designs",
         path: "/designer/designs",
         icon: "paint-brush",
       },
-      {
-        name: "Marketplace",
-        path: "/designer/marketplace",
-        icon: "storefront",
-      },
-      { name: "Analytics", path: "/designer/analytics", icon: "chart-bar" },
-      { name: "Profile", path: "/designer/profile", icon: "user" },
+      { name: "Virtual Try-On", path: "/client/try-on", icon: "eye" },
     ];
   }
   return [];

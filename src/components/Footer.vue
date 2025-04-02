@@ -4,7 +4,7 @@
       <div class="container mx-auto px-20">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
-            <h3 class="text-xl font-bold mb-4">TAYLORNI</h3>
+            <h3 class="text-xl font-bold mb-4">TAILORNII</h3>
             <p class="text-gray-400">Revolutionizing fashion with technology since 2023</p>
           </div>
           
