@@ -28,11 +28,11 @@ onMounted(() => {
 <template>
   <main id="about" class="pb-16 bg-white">
     <!-- Hero -->
-    <section class="container mx-auto lg:flex items-center justify-center gap-5 py-16 px-20">
-      <div class="lg:flex-1 fade-in">
-        <h1 class="text-3xl lg:text-7xl font-bold text-amber-500 text-center lg:text-start mb-12">About Taylorni</h1>
+    <section class="container mx-auto lg:flex items-center justify-center gap-5 py-8 md:py-12 lg:py-16 px-4 md:px-8 lg:px-20">
+      <div class="lg:flex-1 fade-in mb-8 lg:mb-0">
+        <h1 class="text-2xl md:text-3xl lg:text-7xl font-bold text-amber-500 text-center lg:text-start mb-6 lg:mb-12">About Taylorni</h1>
         
-        <p class="text-gray-700 text-lg mb-8">
+        <p class="text-gray-700 text-base md:text-lg mb-8">
           Taylorni is a digital fashion platform revolutionizing how designers and clients interact. We provide seamless custom orders, ready-made outfits, and virtual try-ons, blending fashion with technology.
         </p>
       </div>
@@ -42,25 +42,25 @@ onMounted(() => {
     </section> 
 
     <!-- Our Mission Section -->
-    <section class="py-16 bg-purple-50">
-      <div class="container mx-auto px-20 ">
-        <div class="flex flex-col-reverse lg:flex-row items-center">
-          <div class="mb-8 md:mb-0 flex-1 slide-in-left">
+    <section class="py-8 md:py-12 lg:py-16 bg-purple-50">
+      <div class="container mx-auto px-4 md:px-8 lg:px-20">
+        <div class="flex flex-col-reverse lg:flex-row items-center gap-8">
+          <div class="w-full lg:flex-1 slide-in-left">
             <img 
               :src="aboutMish" 
               alt="Fashion workspace" 
               class="rounded-lg shadow-lg w-full hover-lift"
             />
           </div>
-          <div class="md:pl-12 flex-1 slide-in-right">
-            <h2 class="text-3xl font-bold text-purple-800 mb-6">Our Mission: Helping Millions Grow Better</h2>
-            <p class="text-lg text-gray-700 mb-6">
+          <div class="w-full lg:flex-1 lg:pl-12 slide-in-right">
+            <h2 class="text-2xl md:text-3xl font-bold text-purple-800 mb-4 md:mb-6">Our Mission: Helping Millions Grow Better</h2>
+            <p class="text-base md:text-lg text-gray-700 mb-4 md:mb-6">
               We aim to empower fashion designers and customers by providing an intuitive digital space where 
               creativity meets convenience. By integrating smart technology with traditional tailoring, we ensure 
               that clients receive quality garments that fit perfectly while enabling designers to manage their 
               businesses efficiently.
             </p>
-            <p class="text-lg text-gray-700">
+            <p class="text-base md:text-lg text-gray-700">
               We believe not just in growing bigger, but in growing better. And growing better means aligning the
               success of your own business with the success of your customers. Win-win!
             </p>
@@ -70,11 +70,11 @@ onMounted(() => {
     </section>
 
     <!-- Our Vision Section -->
-    <section class="py-16 bg-white">
-      <div class="container mx-auto px-20">
+    <section class="py-8 md:py-12 lg:py-16 bg-white">
+      <div class="container mx-auto px-4 md:px-8 lg:px-20">
         <div class="max-w-4xl mx-auto text-center slide-in-up">
-          <h2 class="text-3xl font-bold text-purple-800 mb-6">Our Vision</h2>
-          <p class="text-lg text-gray-700">
+          <h2 class="text-2xl md:text-3xl font-bold text-purple-800 mb-4 md:mb-6">Our Vision</h2>
+          <p class="text-base md:text-lg text-gray-700">
             To become the leading digital hub for fashion customization, where technology-driven solutions 
             make fashion more accessible, personalized, and sustainable.
           </p>
@@ -83,19 +83,19 @@ onMounted(() => {
     </section>
         
     <!-- Our Story -->
-    <section class="py-16 bg-gray-50">
-      <div class="container mx-auto px-20">
-        <div class="flex flex-col lg:flex-row items-center">
-          <div class="pb-12 lg:pr-12 flex-1 slide-in-left">
-            <h2 class="text-3xl font-bold text-purple-800 mb-6">Our Story</h2>
-            <p class="text-lg text-gray-700 mb-6">
+    <section class="py-8 md:py-12 lg:py-16 bg-gray-50">
+      <div class="container mx-auto px-4 md:px-8 lg:px-20">
+        <div class="flex flex-col lg:flex-row items-center gap-8">
+          <div class="w-full lg:flex-1 pb-8 lg:pb-0 lg:pr-12 slide-in-left">
+            <h2 class="text-2xl md:text-3xl font-bold text-purple-800 mb-4 md:mb-6">Our Story</h2>
+            <p class="text-base md:text-lg text-gray-700 mb-4 md:mb-6">
               Taylorni began as a simple idea between two junior students at <span class="font-bold">Palm University College</span>—combining technology and fashion to make custom design more accessible. With Halifax leading software development and Ruth driving marketing and research, we are building a platform that streamlines the fashion experience for both designers and clients.
             </p>
-            <p class="text-lg text-gray-700">
+            <p class="text-base md:text-lg text-gray-700">
               Though we're a startup still in its early stages, our passion and dedication push us to keep learning, improving, and turning Taylorni into something truly impactful.
             </p>
           </div>
-          <div class="flex-1 slide-in-right">
+          <div class="w-full lg:flex-1 slide-in-right">
             <img 
               :src="aboutStory" 
               alt="Founders" 
@@ -107,10 +107,10 @@ onMounted(() => {
     </section>
 
      <!-- Values -->
-    <section class="mb-12 pt-5">
-      <h2 class="text-3xl font-bold text-amber-500 mb-12 text-center fade-in">Our Values</h2>
+    <section class="mb-12 pt-5 px-4 md:px-8 lg:px-20">
+      <h2 class="text-2xl md:text-3xl font-bold text-amber-500 mb-8 md:mb-12 text-center fade-in">Our Values</h2>
       <!-- innovation -->
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 px-20">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div class="bg-white border border-amber-200 rounded-lg p-4 text-center value-card fade-in">
           <div class="bg-amber-100 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-3 icon-pulse">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -157,19 +157,19 @@ onMounted(() => {
     </section>
 
     <!-- Team Section -->
-    <section class="py-16 bg-white">
-      <div class="container mx-auto px-20">
-        <h2 class="text-3xl font-bold text-amber-500 mb-12 text-center fade-in">Meet The Team</h2>
+    <section class="py-8 md:py-12 lg:py-16 bg-white">
+      <div class="container mx-auto px-4 md:px-8 lg:px-20">
+        <h2 class="text-2xl md:text-3xl font-bold text-amber-500 mb-8 md:mb-12 text-center fade-in">Meet The Team</h2>
         
-        <div class="flex flex-col md:flex-row space-y-8 md:space-y-0 md:space-x-8 justify-center">
+        <div class="flex flex-col md:flex-row gap-8 justify-center">
           <!-- Team Member 1 -->
-          <div class="md:w-1/2 max-w-md border border-amber-200 rounded-lg p-8 text-center team-card slide-in-left">
+          <div class="w-full md:w-1/2 max-w-md mx-auto border border-amber-200 rounded-lg p-6 md:p-8 text-center team-card slide-in-left">
             <div class="flex justify-center mb-6">
-              <div class="w-32 h-32 rounded-full overflow-hidden profile-pic">
+              <div class="w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden profile-pic">
                 <!-- <img src="/api/placeholder/128/128" alt="Ruth Asiedua Nyarko" class="w-full h-full object-cover" /> -->
               </div>
             </div>
-            <h3 class="text-2xl font-bold text-gray-900 mb-2">Ruth Asiedua Nyarko</h3>
+            <h3 class="text-xl md:text-2xl font-bold text-gray-900 mb-2">Ruth Asiedua Nyarko</h3>
             <p class="text-amber-500 font-medium uppercase tracking-wider mb-4">GENERAL MANAGER</p>
             <p class="text-gray-700 mb-6">
               The strategic brain of Taylorni, handling marketing, research, and business operations. 
@@ -191,13 +191,13 @@ onMounted(() => {
           </div>
           
           <!-- Team Member 2 -->
-          <div class="md:w-1/2 max-w-md border border-amber-200 rounded-lg p-8 text-center team-card slide-in-right">
+          <div class="w-full md:w-1/2 max-w-md mx-auto border border-amber-200 rounded-lg p-6 md:p-8 text-center team-card slide-in-right">
             <div class="flex justify-center mb-6">
-              <div class="w-32 h-32 rounded-full overflow-hidden profile-pic">
+              <div class="w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden profile-pic">
                 <!-- <img src="/api/placeholder/128/128" alt="Halifax Shambuck Yeboah" class="w-full h-full object-cover" /> -->
               </div>
             </div>
-            <h3 class="text-2xl font-bold text-gray-900 mb-2">Halifax Shambuck Yeboah</h3>
+            <h3 class="text-xl md:text-2xl font-bold text-gray-900 mb-2">Halifax Shambuck Yeboah</h3>
             <p class="text-amber-500 font-medium uppercase tracking-wider mb-4">CHIEF TECHNOLOGY OFFICER</p>
             <p class="text-gray-700 mb-6">
               The tech mastermind behind Taylorni, responsible for programming and software development. 
@@ -221,11 +221,11 @@ onMounted(() => {
     </section>
         
     <!-- Call to Action -->
-    <section class="bg-gradient-to-r from-purple-900 to-amber-500 py-12 mx-20 rounded-xl text-center shadow-lg cta-section">
-      <h3 class="text-2xl font-bold text-white mb-4">
+    <section class="bg-gradient-to-r from-purple-900 to-amber-500 py-8 md:py-12 mx-4 md:mx-8 lg:mx-20 rounded-xl text-center shadow-lg cta-section">
+      <h3 class="text-xl md:text-2xl font-bold text-white mb-4 px-4">
         Join <span class="italic">Taylorni</span> and experience the future of fashion. 🚀
       </h3>
-      <button class="btn btn-lg bg-white border-none text-purple-900 hover:bg-gray-100 font-bold py-3 px-8 rounded-lg shadow-md transition duration-300 pulse-btn">
+      <button class="btn btn-lg bg-white border-none text-purple-900 hover:bg-gray-100 font-bold py-2 md:py-3 px-6 md:px-8 rounded-lg shadow-md transition duration-300 pulse-btn">
         Sign up today!
       </button>
     </section>
@@ -383,5 +383,16 @@ onMounted(() => {
   transform: scale(0, 0);
   opacity: 0.3;
   transition: 0s;
+}
+
+/* Media queries for better responsiveness */
+@media (max-width: 640px) {
+  .value-card {
+    margin-bottom: 1rem;
+  }
+  
+  .team-card {
+    margin-bottom: 2rem;
+  }
 }
 </style>
