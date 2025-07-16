@@ -22,28 +22,21 @@ export const useDesignerStore = defineStore("designer", () => {
       const storedDesigners = localStorage.getItem("designers");
 
       if (storedDesigners) {
-        // Use localStorage data if available
         designers.value = JSON.parse(storedDesigners);
+      } else if (import.meta.env.DEV) {
+        // Only load from static JSON in development
+        const response = await fetch("/database/designers.json");
+        if (!response.ok) throw new Error("Failed to fetch designers");
+
+        const data = await response.json();
+        designers.value = data;
+        saveToLocalStorage();
       } else {
-        // Otherwise fetch from the JSON file
-        try {
-          const response = await fetch("/database/designers.json", {
-            headers: { "Content-Type": "application/json" },
-          });
-
-          if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-          }
-
-          const data = await response.json();
-          designers.value = data;
-
-          // Store in localStorage for future use
-          saveToLocalStorage();
-        } catch (fetchError) {
-          saveToLocalStorage();
-        }
+        // In production, don't try to fetch JSON that never updates
+        designers.value = [];
+        saveToLocalStorage();
       }
+
     } catch (err) {
       console.error("Error loading designers:", err);
       error.value = "Failed to load designers";

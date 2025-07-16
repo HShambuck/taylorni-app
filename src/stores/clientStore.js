@@ -34,41 +34,36 @@ export const useClientStore = defineStore("client", () => {
   };
 
   // Actions
-  const fetchClients = async () => {
-    isLoading.value = true;
-    error.value = null;
+ const fetchClients = async () => {
+   isLoading.value = true;
+   error.value = null;
 
-    try {
-      // First check if we have data in localStorage
-      const storedClients = localStorage.getItem("clients");
+   try {
+     const storedClients = localStorage.getItem("clients");
 
-      if (storedClients) {
-        // Use localStorage data if available
-        clients.value = JSON.parse(storedClients);
-      } else {
-        // Otherwise fetch from the JSON file
-        try {
-          const response = await fetch("/database/clients.json");
-          if (!response.ok) throw new Error("Failed to fetch clients");
+     if (storedClients) {
+       clients.value = JSON.parse(storedClients);
+     } else if (import.meta.env.DEV) {
+       // ONLY in local development, load from static JSON
+       const response = await fetch("/database/clients.json");
+       if (!response.ok) throw new Error("Failed to fetch clients");
 
-          const data = await response.json();
-          clients.value = data;
+       const data = await response.json();
+       clients.value = data;
+       saveToLocalStorage();
+     } else {
+       // In production (e.g. Vercel), initialize empty or fallback data
+       clients.value = [];
+       saveToLocalStorage();
+     }
+   } catch (err) {
+     console.error("Error loading clients:", err);
+     error.value = "Failed to load clients";
+   } finally {
+     isLoading.value = false;
+   }
+ };
 
-          // Store in localStorage for future use
-          saveToLocalStorage();
-        } catch (fetchError) {
-          // If fetch fails, fallback to imported data
-          console.warn("Fetch failed, using imported data", fetchError);
-          saveToLocalStorage();
-        }
-      }
-    } catch (err) {
-      console.error("Error loading clients:", err);
-      error.value = "Failed to load clients";
-    } finally {
-      isLoading.value = false;
-    }
-  };
 
   const addClient = (clientData) => {
     // Make sure clients are loaded
