@@ -1,0 +1,157 @@
+/* src/pages/About.css */
+
+/* Base animation classes */
+.fade-in,
+.slide-in-left,
+.slide-in-right,
+.slide-in-up,
+.scale-in {
+  opacity: 0;
+  transition: all 0.8s ease-out;
+}
+
+.fade-in {
+  transform: translateY(20px);
+}
+
+.slide-in-left {
+  transform: translateX(-50px);
+}
+
+.slide-in-right {
+  transform: translateX(50px);
+}
+
+.slide-in-up {
+  transform: translateY(30px);
+}
+
+.scale-in {
+  transform: scale(0.9);
+}
+
+/* Animated state */
+.fade-in.animate,
+.slide-in-left.animate,
+.slide-in-right.animate,
+.slide-in-up.animate,
+.scale-in.animate {
+  opacity: 1;
+  transform: translate(0) scale(1);
+}
+
+/* Value cards animation */
+.value-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.value-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Icon animation */
+.icon-pulse {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4);
+  }
+  70% {
+    transform: scale(1.1);
+    box-shadow: 0 0 0 10px rgba(245, 158, 11, 0);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Team card animations */
+.team-card {
+  transition: all 0.3s ease;
+}
+
+.team-card:hover {
+  transform: translateY(-15px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+}
+
+/* Profile pic animation */
+.profile-pic {
+  position: relative;
+  transition: transform 0.5s ease;
+}
+
+.profile-pic:hover {
+  transform: scale(1.05);
+}
+
+/* Social icons animation */
+.social-icon {
+  transition: transform 0.3s ease;
+}
+
+.social-icon:hover {
+  transform: translateY(-5px);
+}
+
+/* Image hover effect */
+.hover-lift {
+  transition: all 0.5s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-10px) scale(1.02);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* CTA section animation */
+.cta-section {
+  animation: gradientShift 10s ease infinite;
+  background-size: 200% 200%;
+}
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Button animation */
+.pulse-btn {
+  position: relative;
+  overflow: hidden;
+}
+
+.pulse-btn:after {
+  content: "";
+  display: block;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  background-image: radial-gradient(circle, #fff 10%, transparent 10.01%);
+  background-repeat: no-repeat;
+  background-position: 50%;
+  transform: scale(10, 10);
+  opacity: 0;
+  transition: transform 0.5s, opacity 1s;
+}
+
+.pulse-btn:active:after {
+  transform: scale(0, 0);
+  opacity: 0.3;
+  transition: 0s;
+}
