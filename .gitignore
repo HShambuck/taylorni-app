@@ -1,21 +1,30 @@
-# Dependencies
-node_modules/
-.pnpm-store/
-
-# Local Environment Variables
-.env
-.env.local
-.env.*.local
-
-# Build Outputs
-dist/
-build/
-.aws-sam/
-.cdk.staging/
-cdk.out/
-
-# IDE & System Files
-.DS_Store
-.vscode/
-.idea/
+# Logs
+logs
 *.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+backend/.env
+backend/legacy-django/.venv
+backend/legacy-django/db.sqlite3
+.venv/
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+__pycache__/
+*.pyc
