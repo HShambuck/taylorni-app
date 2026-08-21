@@ -1,0 +1,21 @@
+{
+  "name": "taylorni-app",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "start": "npm --prefix react-app start",
+    "mobile:start": "npm --prefix react-app start",
+    "mobile:start:offline": "npm --prefix react-app run start:offline",
+    "mobile:android": "npm --prefix react-app run android",
+    "mobile:android:offline": "npm --prefix react-app run android:offline",
+    "mobile:ios": "npm --prefix react-app run ios",
+    "mobile:ios:offline": "npm --prefix react-app run ios:offline",
+    "backend:dev": "npm --prefix backend run dev",
+    "backend:start": "npm --prefix backend run start"
+  },
+  "dependencies": {
+    "expo-blur": "^15.0.8",
+    "expo-linear-gradient": "^15.0.8",
+    "react-native-webview": "^13.16.0"
+  }
+}
